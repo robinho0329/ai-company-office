@@ -69,7 +69,7 @@
       </div>
     </div>
     <div class="sec"><h3>직원 상태 32명</h3><div id="stateSummary"></div></div>
-    <div class="sec"><h3>하루 시나리오 12단계</h3><div id="stepList"></div>
+    <div class="sec"><h3>하루 시나리오 <span id="stepCount">12단계</span></h3><div id="stepList"></div>
       <div id="approvalBox">
         <p id="approvalMsg">★ 대표 승인 대기 — 검수 3팀장이 회의실에서 기다립니다.</p>
         <div class="btnRow">
@@ -579,9 +579,28 @@ function loop(){
 }
 
 /* ── UI ── */
-const STEP_NAMES=['① --check 산출물 지문 확인','② 요구정의 — 질문 1개 확정','③ 수집 — 스냅샷 고정',
-  '④ 품질검사','⑤ EDA·통계','⑥ 피처 + 누수 검사','⑦ 모델링 — 베이스라인 먼저','⑧ 방법론 검수',
-  '⑨ 해석·리포팅','⑩ 현장·문체 검수 (동시)','⑪ ★ 대표 승인 ★','⑫ 재현성 고정 → 비서실 브리핑'];
+/* ── 단계 정의 ──
+   모드마다 앞단(프롤로그) 길이가 다르므로 번호가 아니라 키로 참조한다.
+   번호는 렌더할 때 인덱스로 붙인다 — 12개 고정을 전제하면 모드 추가 시 조용히 어긋난다. */
+const CORE_STEPS = [
+  { k:'check',   t:'--check 산출물 지문 확인' },
+  { k:'define',  t:'요구정의 — 질문 1개 확정' },
+  { k:'collect', t:'수집 — 스냅샷 고정' },
+  { k:'quality', t:'품질검사' },
+  { k:'eda',     t:'EDA·통계' },
+  { k:'feature', t:'피처 + 누수 검사' },
+  { k:'model',   t:'모델링 — 베이스라인 먼저' },
+  { k:'qa1',     t:'방법론 검수' },
+  { k:'interp',  t:'해석·리포팅' },
+  { k:'qa23',    t:'현장·문체 검수 (동시)' },
+  { k:'approve', t:'★ 대표 승인 ★' },
+  { k:'repro',   t:'재현성 고정 → 비서실 브리핑' },
+];
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯';
+let steps = CORE_STEPS.slice();
+/** 현재 단계를 키로 지정한다. 단계 수가 모드마다 달라도 본문은 그대로다. */
+function step(k) { curStep = steps.findIndex(s => s.k === k); }
+function stepLabel(i) { return (CIRCLED[i] || (i + 1) + '.') + ' ' + steps[i].t; }
 function refreshUI(){
   const h=Math.floor(simMin/60)%24, m=Math.floor(simMin%60);
   document.getElementById('clock').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
@@ -590,8 +609,10 @@ function refreshUI(){
   for(const e of emps) cnt[e.state]++;
   document.getElementById('stateSummary').innerHTML=Object.keys(STATES).map(k=>
     `<span><span class="stDot" style="background:${STATES[k].color}"></span>${k} ${cnt[k]}</span>`).join('');
-  document.getElementById('stepList').innerHTML=STEP_NAMES.map((s,i)=>
-    `<div class="step ${i<curStep?'done':i===curStep?'now':''}">${i<curStep?'✔':i===curStep?'▶':'·'} ${s}</div>`).join('');
+  document.getElementById('stepList').innerHTML=steps.map((s,i)=>
+    `<div class="step ${i<curStep?'done':i===curStep?'now':''}">${i<curStep?'✔':i===curStep?'▶':'·'} ${stepLabel(i)}</div>`).join('');
+  const badge=document.getElementById('stepCount'); if(badge) badge.textContent=steps.length+'단계';
+  const now=document.querySelector('#stepList .step.now'); if(now) now.scrollIntoView({block:'nearest'});
   if(approvalPending){
     const sec=Math.floor((performance.now()-approvalSince)/1000);
     document.getElementById('approvalMsg').textContent=`★ 대표 승인 대기 — 검수 3팀장이 회의실에서 ${sec}초째 기다립니다.`;
@@ -629,18 +650,18 @@ async function runDay(){
   for(const e of emps){ e.onsite=true; walkTo(e,e.chair.x,e.chair.y); await wait(150); }
   while(emps.some(e=>e.goal)) await wait(200);
 
-  curStep=0; setDept(10,'진행 중'); await recallDept(10);
+  step('check'); setDept(10,'진행 중'); await recallDept(10);
   await say(E('탁현서'),'--check 돌렸습니다 — 낡은 리포트 없어요.');
   await say(E('문상우'),'지문 확인 완료. 오늘 기준 산출물로 갑니다.');
   setDept(10,'완료');
 
-  curStep=1; setDept(0,'진행 중'); await recallDept(0);
+  step('define'); setDept(0,'진행 중'); await recallDept(0);
   await say(E('한지훈'),'이 분석으로 뭘 결정하실 건가요?');
   await say(E('조은결'),'질문이 2개인데요. 쪼갤까요?');
   await say(E('한지훈'),"쪼개죠. 오늘은 '미탐 IDV 대체 감시' 하나로.");
   setDept(0,'완료'); await handoff('조은결',1,'요구정의서 전달드려요.');
 
-  curStep=2; setDept(1,'데이터 대기'); await recallDept(1);
+  step('collect'); setDept(1,'데이터 대기'); await recallDept(1);
   dataWaitMsg='GitHub 원격 데이터 스냅샷이 아직 없어 수집팀이 데이터 대기 중';
   await say(E('신유빈'),'GitHub 원격 데이터 당겨오는 중… (데이터 대기)',3200);
   dataWaitMsg=null; setDept(1,'진행 중');
@@ -648,13 +669,13 @@ async function runDay(){
   await say(E('서민재'),'스냅샷 시각 박아뒀습니다.');
   setDept(1,'완료'); await handoff('하도윤',2,'스냅샷 경로 전달합니다.');
 
-  curStep=3; setDept(2,'진행 중'); await recallDept(2);
+  step('quality'); setDept(2,'진행 중'); await recallDept(2);
   await say(E('권나린'),'xmeas_09 상한 붙박이예요. 포화입니다.');
   await say(E('남시우'),'타임스탬프 역전은 없네요.');
   await say(E('노아름'),'포화 구간 마스킹하고 넘깁니다.');
   setDept(2,'완료'); await handoff('권나린',3,'품질 리포트 전달해요.');
 
-  curStep=4; setDept(3,'진행 중'); await recallDept(3);
+  step('eda'); setDept(3,'진행 중'); await recallDept(3);
   await say(E('백서윤'),'그림만 있고 수치가 없어요 — 검정 붙일게요.');
   await say(E('고은택'),'이 상관은 열수지로 설명돼요. 기지로 분류.');
   addMsg('시스템','EDA·통계팀 3명이 회의실에서 인수인계합니다.');
@@ -664,30 +685,30 @@ async function runDay(){
     ['고은택','미설명 상관 2건만 다음 팀에 표시해뒀습니다.']]);
   setDept(3,'완료'); await handoff('백서윤',4,'검정 통과 변수 목록입니다.');
 
-  curStep=5; setDept(4,'진행 중'); await recallDept(4);
+  step('feature'); setDept(4,'진행 중'); await recallDept(4);
   await say(E('류하진'),'미래 정보 들어갔습니다. 반려요.'); rejectCount++;
   await say(E('배준혁'),"롤링 윈도우로 다시. 의미는 '냉각 지연'입니다.");
   setDept(4,'완료'); await handoff('류하진',5,'피처 명세 전달합니다.');
 
-  curStep=6; setDept(5,'진행 중'); await recallDept(5);
+  step('model'); setDept(5,'진행 중'); await recallDept(5);
   await say(E('심재윤'),'단순 임계 F1 0.61이에요. 이거보다 나은가요?');
   await say(E('표지안'),'random_state=42 확인했습니다.');
   await say(E('윤도경'),'VAE가 베이스라인 +0.21. 넘깁니다.');
   setDept(5,'완료'); await handoff('표지안',6,'모델 결과표 전달해요.');
 
-  curStep=7; setDept(6,'진행 중'); await recallDept(6);
+  step('qa1'); setDept(6,'진행 중'); await recallDept(6);
   await say(E('진세호'),'시간 경계 언제예요? 갭은요?');
   await say(E('마유나'),'± 없는 단일 수치는 못 넘깁니다.'); rejectCount++;
   await say(E('최시온'),'시드 3회 평균으로 다시 받았습니다. 통과.');
   setDept(6,'완료'); await handoff('진세호',7,'검수 통과분 전달합니다.');
 
-  curStep=8; setDept(7,'진행 중'); await recallDept(7);
+  step('interp'); setDept(7,'진행 중'); await recallDept(7);
   await say(E('천이든'),'상위 기여 변수는 xmeas_21인데, 원인은 아닙니다.');
   await say(E('편도하'),"공정 조치로 바꾸면 '냉각수 라인 점검'이죠.");
   await say(E('임세아'),'결론 수치부터 씁니다.');
   setDept(7,'완료');
 
-  curStep=9; setDept(8,'진행 중'); setDept(9,'진행 중');
+  step('qa23'); setDept(8,'진행 중'); setDept(9,'진행 중');
   await recallDept(8); await recallDept(9);
   flash(E('봉재희'),'태그명 다 붙어 있네요.',2600);
   await say(E('감별이'),'1군 금칙어 0건입니다.');
@@ -696,7 +717,7 @@ async function runDay(){
   setDept(8,'완료'); setDept(9,'완료');
 
   /* ⑪ 대표 승인 — 여기서 반드시 멈춘다 */
-  curStep=10;
+  step('approve');
   addMsg('시스템','검수 3팀장이 회의실로 이동합니다. 대표 승인이 필요합니다.');
   const gate=['최시온','강태섭','오다현'];
   for(const n of gate){ E(n).inMeeting=true; E(n).state='승인 대기'; }
@@ -727,7 +748,7 @@ async function runDay(){
   }
   for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
 
-  curStep=11;
+  step('repro');
   if(decisionMade==='승인'){
     setDept(10,'진행 중'); await recallDept(10);
     await say(E('문상우'),'지문 기록했습니다. 재현 커맨드도요.');
@@ -738,14 +759,14 @@ async function runDay(){
   await walkTo(sec,BRIEF_SPOT.x,BRIEF_SPOT.y);
   await say(sec,'오늘 결정하실 건 1개였습니다.',3000);
   addMsg('유하람',
-`① 오늘 완료: 12단계 중 ${decisionMade==='승인'?12:11}단계
+`① 오늘 완료: ${steps.length}단계 중 ${decisionMade==='승인'?steps.length:steps.length-1}단계
 ② 진행 중: 없음
 ③ 대표 승인 대기: 0건 (처리됨 — ${decisionMade})
 ④ 막힌 것: 반려 ${rejectCount}건(피처 누수 1·불확실성 1) → 재작업 완료
 ⑤ 오늘 대표가 결정할 것: 승인 1건 (완료)`,false,true);
   await walkTo(sec,sec.chair.x,sec.chair.y); sec.inMeeting=false;
   setDept(11,'완료');
-  curStep=12; dayDone=true;
+  curStep=steps.length; dayDone=true;
   addMsg('시스템','하루 일과 종료. 15초 후 다음 날이 자동 시작됩니다.');
   setTimeout(resetDay,15000);
 }
@@ -774,7 +795,7 @@ function bottleneckAnswer(){
   if(dayDone) return `지연 없습니다.`;
   if(curStep>=0){ const active=DEPTS.findIndex((_,i)=>deptEmps(i).some(e=>e.state==='진행 중'));
     const name=active>=0?DEPTS[active].name:'현재 단계';
-    return `${name} 작업 중 — 진행률 ${curStep+1}/12. 정상 속도입니다.`; }
+    return `${name} 작업 중 — 진행률 ${curStep+1}/${steps.length}. 정상 속도입니다.`; }
   return `지연 없습니다.`;
 }
 async function inspectionMeeting(){
@@ -791,8 +812,9 @@ function handleCommand(raw){
   addMsg('대표',q,true);
   const t=q.replace(/\s/g,'');
   if(t.includes('현황')){
-    const step=curStep<0?'출근 전':curStep>=12?'종료':STEP_NAMES[curStep];
-    addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/12 — ${step}. 다음은 ${curStep+1<12?STEP_NAMES[Math.min(curStep+1,11)]:'퇴근'}입니다.`);
+    const cur=curStep<0?'출근 전':curStep>=steps.length?'종료':stepLabel(curStep);
+    const nxt=curStep+1<steps.length?stepLabel(curStep+1):'퇴근';
+    addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/${steps.length} — ${cur}. 다음은 ${nxt}입니다.`);
     return; }
   if(t.includes('왜')&&(t.includes('막')||t.includes('늦'))){ addMsg('유하람',bottleneckAnswer()); return; }
   if(t.includes('수치')||t.includes('어디서')){
