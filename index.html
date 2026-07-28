@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>제조 데이터 분석팀 오피스</title>
+<style>
+  /* ── 전체 레이아웃 ── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:#20242e; color:#e8e6e0; font-family:'Malgun Gothic','Segoe UI',sans-serif; overflow:hidden; }
+  #app { display:flex; height:100vh; }
+  #officeWrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:8px; min-width:0; }
+  #office { background:#2a2e3a; border-radius:8px; max-width:100%; max-height:100%; }
+  /* ── 우측 패널 ── */
+  #panel { width:360px; background:#282c38; border-left:1px solid #3a3f4e; display:flex; flex-direction:column; overflow:hidden; }
+  .sec { padding:10px 14px; border-bottom:1px solid #3a3f4e; }
+  .sec h3 { font-size:12px; color:#9aa3b5; margin-bottom:6px; letter-spacing:1px; }
+  #clock { font-size:20px; font-weight:bold; color:#f2c94c; }
+  #dayLabel { font-size:12px; color:#9aa3b5; margin-left:8px; }
+  /* 상태 요약 */
+  #stateSummary { display:flex; flex-wrap:wrap; gap:6px 12px; font-size:12px; }
+  .stDot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #555; }
+  /* 시나리오 단계 */
+  #stepList { font-size:11.5px; line-height:1.75; max-height:170px; overflow-y:auto; }
+  .step { color:#6c7385; }
+  .step.now { color:#f2c94c; font-weight:bold; }
+  .step.done { color:#3ecfae; }
+  /* 컨트롤 */
+  .btnRow { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  button { background:#3a4155; color:#e8e6e0; border:1px solid #4a526a; border-radius:6px;
+           padding:6px 12px; font-size:12px; cursor:pointer; font-family:inherit; }
+  button:hover:not(:disabled) { background:#4a526a; }
+  button:disabled { opacity:.4; cursor:default; }
+  button.speedOn { background:#f2c94c; color:#222; border-color:#f2c94c; }
+  /* 승인 패널 */
+  #approvalBox { display:none; background:#3d2436; border:1px solid #e0407a; border-radius:8px; padding:10px; margin-top:8px; }
+  #approvalBox.show { display:block; animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,64,122,.5);} 50%{box-shadow:0 0 0 6px rgba(224,64,122,0);} }
+  #approvalBox p { font-size:12px; margin-bottom:8px; }
+  #btnApprove { background:#2a9d6f; border-color:#2a9d6f; }
+  #btnRevise { background:#c98a2a; border-color:#c98a2a; }
+  #btnDiscard { background:#a04040; border-color:#a04040; }
+  /* 지시창 */
+  #cmdSec { flex:1; display:flex; flex-direction:column; min-height:0; }
+  #log { flex:1; overflow-y:auto; font-size:12px; line-height:1.55; padding:4px 0; }
+  .msg { margin-bottom:7px; }
+  .msg .who { font-weight:bold; margin-right:5px; }
+  .msg.me .who { color:#f2c94c; }
+  .msg pre { white-space:pre-wrap; font-family:inherit; background:#20242e; border-radius:6px; padding:6px 8px; margin-top:3px; font-size:11.5px; }
+  #quickBtns { display:flex; gap:5px; flex-wrap:wrap; margin:6px 0; }
+  #quickBtns button { font-size:11px; padding:4px 8px; }
+  #cmdRow { display:flex; gap:6px; }
+  #cmdInput { flex:1; background:#20242e; border:1px solid #4a526a; border-radius:6px; color:#e8e6e0;
+              padding:7px 10px; font-size:12.5px; font-family:inherit; }
+  #cmdInput:focus { outline:none; border-color:#f2c94c; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="officeWrap"><canvas id="office" width="1098" height="612"></canvas></div>
+  <div id="panel">
+    <div class="sec">
+      <span id="clock">--:--</span><span id="dayLabel">출근 전</span>
+      <div class="btnRow">
+        <button id="btnStart">하루 시작</button>
+        <button id="btnPause" disabled>일시정지</button>
+        <button class="spd speedOn" data-s="1">1x</button>
+        <button class="spd" data-s="2">2x</button>
+        <button class="spd" data-s="4">4x</button>
+      </div>
+    </div>
+    <div class="sec"><h3>직원 상태 32명</h3><div id="stateSummary"></div></div>
+    <div class="sec"><h3>하루 시나리오 12단계</h3><div id="stepList"></div>
+      <div id="approvalBox">
+        <p id="approvalMsg">★ 대표 승인 대기 — 검수 3팀장이 회의실에서 기다립니다.</p>
+        <div class="btnRow">
+          <button id="btnApprove">승인</button><button id="btnRevise">수정 요청</button>
+          <button id="btnHold">보류</button><button id="btnDiscard">폐기</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec" id="cmdSec">
+      <h3>대표 지시창</h3>
+      <div id="log"></div>
+      <div id="quickBtns">
+        <button data-q="현황 보고">현황 보고</button>
+        <button data-q="왜 막혔어?">왜 막혔어?</button>
+        <button data-q="검수 소집">검수 소집</button>
+        <button data-q="이 수치 어디서 나왔어?">수치 출처</button>
+        <button data-q="그 한계 근거 대봐">한계 근거</button>
+        <button data-q="집중 모드">집중 모드</button>
+      </div>
+      <div id="cmdRow">
+        <input id="cmdInput" placeholder='예: "모델링팀 뭐해?" / "왜 막혔어?"'>
+        <button id="btnSend">지시</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ══════════════════════════════════════════════════════════
+   제조 데이터 분석팀 오피스 — AI_COMPANY.md(mfg-anomaly-workflow) 사규 시각화
+   32명(팀장12+팀원20) · 상태 5종 · 하루 12단계 · 대표 지시창
+   규칙: ⑪ 대표 승인에서 반드시 멈춘다 / 회의 참석자는 자율 행동 금지
+   ══════════════════════════════════════════════════════════ */
+const TILE = 22, COLS = 61, ROWS = 34;
+const cv = document.getElementById('office'), cx = cv.getContext('2d');
+// 고DPI 대응 — 백킹스토어를 논리크기의 DPR배로 잡고 논리좌표로 그린다.
+// DPR이 1인 환경에서도 최소 2배로 슈퍼샘플링해, 캔버스가 어떤 크기로 표시되든
+// 확대가 아닌 축소가 일어나게 만든다(축소는 계단현상이 생기지 않는다).
+const DPR = Math.max(2, Math.min(window.devicePixelRatio || 1, 3));
+cv.width = COLS * TILE * DPR;  cv.height = ROWS * TILE * DPR;
+cv.style.width = (COLS * TILE) + 'px';  cv.style.height = (ROWS * TILE) + 'px';
+cx.scale(DPR, DPR);
+cx.textBaseline = 'alphabetic';
+
+/** 캔버스가 실제로 표시되는 배율. 1보다 작으면 축소돼 작은 글자가 뭉갠다. */
+function dispScale() {
+  return (cv.clientWidth || COLS * TILE) / (COLS * TILE);
+}
+
+/** 타일마다 결정적인 미세 밝기 편차 — 단색 바닥의 플라스틱한 느낌을 없앤다. */
+function tileNoise(x, y) {
+  const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return (h - Math.floor(h)) - 0.5;
+}
+
+/* ── 상태 5종 (사규 §8) ── */
+const STATES = {
+  '완료':      { color:'#3ecfae', bubble:'산출물 경로 남겼습니다' },
+  '진행 중':   { color:'#f2c94c', bubble:'돌리는 중…' },
+  '승인 대기': { color:'#e0407a', bubble:'확인해주세요' },
+  '데이터 대기':{ color:'#b79ce8', bubble:'산출물이 없어요' },
+  '대기':      { color:'#ffffff', bubble:'업무 대기중' },
+};
+
+/* ── 부서 12 + 인원 (사규 §7 그대로) ── */
+const DEPTS = [
+  { name:'현장 요구정의팀', short:'요구정의', color:'#e07a5f' },
+  { name:'데이터 수집팀',   short:'수집',     color:'#f2a65a' },
+  { name:'데이터 품질팀',   short:'품질',     color:'#e9c46a' },
+  { name:'EDA·통계팀',     short:'EDA통계',  color:'#8ab17d' },
+  { name:'피처 엔지니어링팀',short:'피처',    color:'#2a9d8f' },
+  { name:'모델링팀',        short:'모델링',   color:'#4d908e' },
+  { name:'방법론 검수팀',   short:'방법론검수',color:'#577590' },
+  { name:'해석·리포팅팀',   short:'해석',     color:'#7d6b91' },
+  { name:'현장 검수팀',     short:'현장검수', color:'#b5657e' },
+  { name:'문체 검수팀',     short:'문체검수', color:'#a26769' },
+  { name:'재현성·운영팀',   short:'재현성',   color:'#6d9dc5' },
+  { name:'비서실',          short:'비서실',   color:'#84a59d' },
+];
+const ROSTER = [
+  {n:'한지훈',c:'한요구',d:0,lead:1,buzz:'이 분석으로 뭘 결정하실 건가요?'},
+  {n:'조은결',c:'조질문',d:0,lead:0,buzz:'질문이 2개인데요. 쪼갤까요?'},
+  {n:'서민재',c:'서수집',d:1,lead:1,buzz:'스냅샷 시각부터 박아두겠습니다.'},
+  {n:'신유빈',c:'신적재',d:1,lead:0,buzz:'총 적재 N행, 비율 나왔어요.'},
+  {n:'하도윤',c:'하스냅',d:1,lead:0,buzz:'원본은 안 건드렸습니다. 복제본이에요.'},
+  {n:'노아름',c:'노품질',d:2,lead:1,buzz:'그 결측, 어떻게 채웠는지 안 적혀 있는데요.'},
+  {n:'권나린',c:'권결측',d:2,lead:0,buzz:'이 태그 상한에 붙박이예요. 포화입니다.'},
+  {n:'남시우',c:'남시각',d:2,lead:0,buzz:'역전 구간 있습니다. 정렬부터요.'},
+  {n:'정해린',c:'정통계',d:3,lead:1,buzz:"검정 없이 '차이가 있다'는 못 씁니다."},
+  {n:'백서윤',c:'백분포',d:3,lead:0,buzz:'그림만 있고 수치가 없어요.'},
+  {n:'고은택',c:'고상관',d:3,lead:0,buzz:'이건 열수지로 설명돼요. 기지 상관입니다.'},
+  {n:'배준혁',c:'배피처',d:4,lead:1,buzz:'이 피처 물리적 의미 한 줄로 말해보세요.'},
+  {n:'류하진',c:'류누수',d:4,lead:0,buzz:'미래 정보 들어갔습니다. 반려요.'},
+  {n:'윤도경',c:'윤모델',d:5,lead:1,buzz:'베이스라인부터요. 그다음이 모델입니다.'},
+  {n:'심재윤',c:'심기준',d:5,lead:0,buzz:'단순 임계가 이 정도 나와요. 이거보다 나은가요?'},
+  {n:'표지안',c:'표학습',d:5,lead:0,buzz:'random_state=42 확인했습니다.'},
+  {n:'최시온',c:'최검증',d:6,lead:1,buzz:'무작위 분할이면 여기서 반려입니다.'},
+  {n:'진세호',c:'진분할',d:6,lead:0,buzz:'시간 경계 언제예요? 갭은요?'},
+  {n:'마유나',c:'마편차',d:6,lead:0,buzz:'± 없는 단일 수치는 못 넘깁니다.'},
+  {n:'임세아',c:'임해석',d:7,lead:1,buzz:'기여도지 원인이 아닙니다.'},
+  {n:'천이든',c:'천기여',d:7,lead:0,buzz:'상위 기여 변수는 이건데, 원인은 아닙니다.'},
+  {n:'편도하',c:'편번역',d:7,lead:0,buzz:'이걸 공정 조치로 바꾸면 뭐가 되죠?'},
+  {n:'강태섭',c:'강현장',d:8,lead:1,buzz:'태그명 없으면 현장 못 나갑니다.'},
+  {n:'봉재희',c:'봉태그',d:8,lead:0,buzz:'xmeas 몇 번인지 안 적혀 있어요.'},
+  {n:'설우빈',c:'설비용',d:8,lead:0,buzz:'미탐 N건이면 출동 몇 번인가요?'},
+  {n:'오다현',c:'오문체',d:9,lead:1,buzz:"'우수한'은 수치가 아니에요."},
+  {n:'감별이',c:'감금칙',d:9,lead:0,buzz:'1군 걸렸습니다. 위치 드릴게요.'},
+  {n:'문상우',c:'문재현',d:10,lead:1,buzz:'재현 커맨드 한 줄 주세요.'},
+  {n:'탁현서',c:'탁지문',d:10,lead:0,buzz:'--check 돌렸는데 낡은 리포트 있어요.'},
+  {n:'여단우',c:'여실패',d:10,lead:0,buzz:'실패를 성공으로 안 적습니다.'},
+  {n:'유하람',c:'유비서',d:11,lead:1,buzz:'오늘 결정하실 건 1개입니다.'},
+  {n:'구소명',c:'구취합',d:11,lead:0,buzz:'중복 설명은 지웠습니다.'},
+];
+
+/* ── 지도 ── */
+const walk = Array.from({length:ROWS},()=>Array(COLS).fill(true));
+const tint = Array.from({length:ROWS},()=>Array(COLS).fill('cor')); // 바닥 색 구역
+const furn = []; // {x,y,kind}
+function W(x,y){ if(y>=0&&y<ROWS&&x>=0&&x<COLS) walk[y][x]=false; }
+function buildMap(){
+  for(let x=0;x<COLS;x++){ W(x,0); W(x,33); }
+  for(let y=0;y<ROWS;y++){ W(0,y); W(60,y); }
+  walk[22][0]=true; walk[23][0]=true;                    // 출입구 (좌측 벽 개구부)
+  const doors=[5,15,25,35,45,55];
+  for(const vx of [10,20,30,40,50]){ for(let y=1;y<=9;y++) W(vx,y); for(let y=24;y<=32;y++) W(vx,y); }
+  for(let x=1;x<=59;x++){ if(!doors.includes(x)) W(x,9); if(!doors.includes(x)) W(x,24); }
+  // 라운지 x0..14 / 회의실 x20..40 / 대표실 x46..60 (y12..21)
+  for(let x=1;x<=14;x++){ if(x!==7) W(x,12); if(x!==7) W(x,21); }
+  for(let y=12;y<=21;y++) W(14,y);
+  for(let y=12;y<=21;y++){ W(20,y); W(40,y); }
+  for(let x=21;x<=39;x++){ if(x!==30) W(x,12); if(x!==30) W(x,21); }
+  for(let y=12;y<=21;y++){ if(y!==16&&y!==17) W(46,y); }
+  for(let x=47;x<=59;x++){ W(x,12); W(x,21); }
+  // 바닥 구역 색
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    if(y>=1&&y<=8) tint[y][x]='room';
+    if(y>=25&&y<=32) tint[y][x]='room';
+    if(y>=13&&y<=20){ if(x>=1&&x<=13) tint[y][x]='lounge'; if(x>=21&&x<=39) tint[y][x]='meet'; if(x>=47&&x<=59) tint[y][x]='ceo'; }
+  }
+  // 가구
+  furn.push({x:27,y:16,k:'table'},{x:28,y:16,k:'table'},{x:29,y:16,k:'table'},{x:30,y:16,k:'table'},
+            {x:31,y:16,k:'table'},{x:32,y:16,k:'table'},{x:33,y:16,k:'table'},
+            {x:27,y:17,k:'table'},{x:28,y:17,k:'table'},{x:29,y:17,k:'table'},{x:30,y:17,k:'table'},
+            {x:31,y:17,k:'table'},{x:32,y:17,k:'table'},{x:33,y:17,k:'table'});
+  furn.push({x:2,y:13,k:'coffee'},{x:3,y:13,k:'coffee'},{x:12,y:13,k:'plant'},{x:2,y:20,k:'plant'});
+  furn.push({x:53,y:16,k:'desk'},{x:48,y:13,k:'plant'},{x:58,y:13,k:'plant'});
+  for(const f of furn) W(f.x,f.y);
+}
+/* 부서 방 좌표: 0~5 상단, 6~11 하단 */
+function roomOf(d){ const top=d<6, j=top?d:d-6, wx=j*10;
+  return { wx, top, door:{x:wx+5,y:top?9:24}, label:{x:wx+5,y:top?6.6:27.4} }; }
+function deskSpots(d,count){ const r=roomOf(d), dy=r.top?2:31, cy=r.top?3:30;
+  const xs = count===3? [r.wx+2,r.wx+5,r.wx+8] : [r.wx+3,r.wx+7];
+  return xs.map(x=>({desk:{x,y:dy}, chair:{x,y:cy}})); }
+const MEET_SEATS=[{x:28,y:15},{x:30,y:15},{x:32,y:15},{x:28,y:18},{x:30,y:18},{x:32,y:18}];
+const LOUNGE_SPOTS=[{x:2,y:15},{x:4,y:14},{x:6,y:15},{x:9,y:14},{x:5,y:18},{x:8,y:17}];
+const CEO_SPOT={x:53,y:17}, BRIEF_SPOT={x:51,y:17}, ENTRY={x:0,y:23};
+
+/* ── 직원 ── */
+const emps=[];
+function buildEmps(){
+  const perDept={};
+  for(const r of ROSTER){ (perDept[r.d]=perDept[r.d]||[]).push(r); }
+  for(let d=0;d<12;d++){ const list=perDept[d], spots=deskSpots(d,list.length);
+    list.forEach((r,i)=>{ emps.push({ ...r, id:emps.length, dept:d,
+      desk:spots[i].desk, chair:spots[i].chair,
+      x:ENTRY.x, y:ENTRY.y, path:[], seg:0, state:'대기', onsite:false, sitting:false,
+      inMeeting:false, wandering:false, recall:false, bubble:null, resolver:null, goal:null, stuck:0 }); });
+  }
+}
+const E = name => emps.find(e=>e.n===name);
+const deptEmps = d => emps.filter(e=>e.dept===d);
+
+/* ── A* (4방향 · 서 있는 직원 칸 우회) ── */
+function occupiedSet(self){ const s=new Set();
+  for(const e of emps){ if(e!==self && e.onsite && e.path.length===0) s.add(e.x+','+e.y); } return s; }
+function astar(sx,sy,gx,gy,occ){
+  if(sx===gx&&sy===gy) return [];
+  const key=(x,y)=>x+','+y, open=[{x:sx,y:sy,g:0,f:0,p:null}], seen=new Map();
+  seen.set(key(sx,sy),0);
+  while(open.length){
+    let bi=0; for(let i=1;i<open.length;i++) if(open[i].f<open[bi].f) bi=i;
+    const cur=open.splice(bi,1)[0];
+    if(cur.x===gx&&cur.y===gy){ const path=[]; let n=cur; while(n.p){ path.unshift({x:n.x,y:n.y}); n=n.p; } return path; }
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=cur.x+dx, ny=cur.y+dy;
+      if(nx<0||ny<0||nx>=COLS||ny>=ROWS||!walk[ny][nx]) continue;
+      const k=key(nx,ny);
+      if(occ.has(k)&&!(nx===gx&&ny===gy)) continue;
+      const g=cur.g+1;
+      if(seen.has(k)&&seen.get(k)<=g) continue;
+      seen.set(k,g);
+      open.push({x:nx,y:ny,g,f:g+Math.abs(gx-nx)+Math.abs(gy-ny),p:cur});
+    }
+  }
+  return null;
+}
+function walkTo(e,tx,ty){
+  return new Promise(res=>{ e.goal={x:tx,y:ty}; e.resolver=res; e.sitting=false; e.stuck=0;
+    const p=astar(e.x,e.y,tx,ty,occupiedSet(e)); e.path=p||[]; e.seg=0; });
+}
+
+/* ── 시간·속도·대기 ── */
+let speed=1, paused=false, dayStarted=false, dayDone=false;
+let simMin=9*60, curStep=-1, approvalPending=false, approvalSince=0, approvalResolve=null;
+let dataWaitMsg=null, rejectCount=0, decisionMade=null;
+const pendWaits=[];
+const wait=ms=>new Promise(res=>pendWaits.push({left:ms,res}));
+async function say(e,text,ms=2600){ e.bubble={text,until:Infinity}; await wait(ms); e.bubble=null; }
+function flash(e,text,ms=2600){ e.bubble={text,until:performance.now()+ms/Math.max(speed,1)*1}; } // 즉발 말풍선
+
+/* ── 이동 갱신 ── */
+function updateEmps(dt){
+  const spd=3.2*speed;
+  for(const e of emps){
+    if(e.bubble && e.bubble.until!==Infinity && performance.now()>e.bubble.until) e.bubble=null;
+    if(!e.goal) continue;
+    if(e.path===null||e.path.length===0){
+      if(e.x===e.goal.x&&e.y===e.goal.y){ const r=e.resolver; e.goal=null; e.resolver=null;
+        if(e.chair&&e.x===e.chair.x&&e.y===e.chair.y) e.sitting=true;
+        if(r) r(); continue; }
+      e.stuck+=dt;
+      if(e.stuck>0.4){ e.stuck=0; const p=astar(e.x,e.y,e.goal.x,e.goal.y,occupiedSet(e));
+        if(p) e.path=p; else if((e.stuckTotal=(e.stuckTotal||0)+1)>25){ e.x=e.goal.x; e.y=e.goal.y; e.path=[]; e.stuckTotal=0; } }
+      continue;
+    }
+    const nxt=e.path[0];
+    const blocked=emps.some(o=>o!==e&&o.onsite&&o.path.length===0&&o.x===nxt.x&&o.y===nxt.y);
+    if(blocked){ const p=astar(e.x,e.y,e.goal.x,e.goal.y,occupiedSet(e)); if(p){e.path=p; continue;} }
+    e.seg+=spd*dt;
+    if(e.seg>=1){ e.x=nxt.x; e.y=nxt.y; e.path.shift(); e.seg=0; }
+  }
+}
+/* 라운지 자율 행동 — 회의 참석자·근무 중 직원 금지 (2차 시도 실패 교훈) */
+function wanderAI(dt){
+  if(!dayStarted||dayDone) return;
+  const now=emps.filter(e=>e.wandering).length;
+  for(const e of emps){
+    if(e.wandering&&e.recall) continue;
+    if(now>=3) break;
+    if(e.state!=='대기'||e.inMeeting||e.wandering||!e.onsite||e.goal) continue;
+    if(Math.random()<dt*0.006) startWander(e);
+  }
+}
+async function startWander(e){
+  e.wandering=true;
+  const spot=LOUNGE_SPOTS[Math.floor(Math.random()*LOUNGE_SPOTS.length)];
+  await walkTo(e,spot.x,spot.y);
+  if(!e.recall){ flash(e,'☕',3000); await wait(3500+Math.random()*2500); }
+  await walkTo(e,e.chair.x,e.chair.y);
+  e.wandering=false; e.recall=false;
+}
+async function recallDept(d){
+  for(const e of deptEmps(d)) if(e.wandering) e.recall=true;
+  while(deptEmps(d).some(e=>e.wandering)) await wait(200);
+}
+function setDept(d,state){ for(const e of deptEmps(d)) e.state=state; }
+
+/* ── 그리기 ── */
+/* ── 팔레트 ── 구역별 바닥/벽 색. 단색 대신 명암 두 톤을 쓴다. */
+const TINTS = {
+  cor:    { base:'#8d8778', line:'#7d7869' },   // 복도
+  room:   { base:'#b6ae9c', line:'#a79f8d' },   // 부서 방
+  lounge: { base:'#93a487', line:'#84957a' },   // 라운지
+  meet:   { base:'#a08fb4', line:'#9080a4' },   // 회의실
+  ceo:    { base:'#b79f77', line:'#a8906a' },   // 대표실
+};
+const WALL = { face:'#413b33', top:'#5a5248', side:'#332e28' };
+const WALL_H = 7;  // 벽 윗면 두께(px) — 살짝 위로 올려 입체로 보이게 한다
+
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    .map(v => Math.max(0, Math.min(255, Math.round(v + amt))));
+  return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+}
+
+function draw() {
+  cx.clearRect(0, 0, COLS * TILE, ROWS * TILE);
+
+  // ① 바닥 — 구역색 + 타일별 미세 편차 + 격자선
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (!walk[y][x]) continue;
+    const pal = TINTS[tint[y][x]] || TINTS.cor;
+    cx.fillStyle = shade(pal.base, tileNoise(x, y) * 10);
+    cx.fillRect(x * TILE, y * TILE, TILE, TILE);
+    cx.strokeStyle = pal.line;
+    cx.lineWidth = 1;
+    cx.strokeRect(x * TILE + 0.5, y * TILE + 0.5, TILE - 1, TILE - 1);
+  }
+
+  // ② 벽 — 아래 그림자 → 정면 → 윗면 순으로 쌓아 두께를 만든다
+  cx.fillStyle = 'rgba(0,0,0,.16)';
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (walk[y][x] || furn.some(f => f.x === x && f.y === y)) continue;
+    if (y + 1 < ROWS && walk[y + 1][x]) cx.fillRect(x * TILE, (y + 1) * TILE, TILE, 5);
+  }
+  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+    if (walk[y][x]) continue;
+    const f = furn.find(f => f.x === x && f.y === y);
+    if (f) { drawFurniture(f); continue; }
+    const px = x * TILE, py = y * TILE;
+    cx.fillStyle = WALL.face;
+    cx.fillRect(px, py, TILE, TILE);
+    const openAbove = y > 0 && walk[y - 1][x];
+    cx.fillStyle = WALL.top;
+    cx.fillRect(px, py - (openAbove ? WALL_H : 0), TILE, openAbove ? WALL_H : 3);
+    cx.fillStyle = WALL.side;
+    cx.fillRect(px, py + TILE - 2, TILE, 2);
+  }
+
+  // ③ 출입구 매트
+  const eg = cx.createLinearGradient(0, 22 * TILE, TILE, 24 * TILE);
+  eg.addColorStop(0, '#d8b25a'); eg.addColorStop(1, '#c09638');
+  cx.fillStyle = eg;
+  cx.fillRect(0, 22 * TILE, TILE, 2 * TILE);
+
+  // ④ 책상·의자
+  for (const e of emps) drawWorkstation(e);
+
+  // ⑤ 방 라벨 — 바닥 위에 옅게 새긴다
+  cx.textAlign = 'center';
+  cx.font = 'bold 13px "Malgun Gothic", sans-serif';
+  for (let d = 0; d < 12; d++) {
+    const r = roomOf(d);
+    cx.fillStyle = 'rgba(255,255,255,.30)';
+    cx.fillText(DEPTS[d].short, r.label.x * TILE + TILE / 2, r.label.y * TILE + 1);
+    cx.fillStyle = 'rgba(40,32,24,.50)';
+    cx.fillText(DEPTS[d].short, r.label.x * TILE + TILE / 2, r.label.y * TILE);
+  }
+  cx.fillStyle = 'rgba(40,32,24,.45)';
+  const zoneLabels = [['라운지', 7.5, 19.6], ['회의실', 30.5, 14.4], ['대표실', 53.5, 19.6]];
+  for (const z of zoneLabels) cx.fillText(z[0], z[1] * TILE, z[2] * TILE);
+  cx.save();
+  cx.translate(11, 23 * TILE + 4); cx.rotate(-Math.PI / 2);
+  cx.font = 'bold 10px "Malgun Gothic", sans-serif';
+  cx.fillStyle = 'rgba(50,38,10,.75)'; cx.fillText('출입구', 0, 0);
+  cx.restore();
+  cx.textAlign = 'left';
+
+  // ⑥ 승인 대기 — 회의실을 맥동시켜 시선을 끈다
+  if (approvalPending) {
+    const a = 0.35 + 0.25 * Math.sin(performance.now() / 320);
+    cx.save();
+    cx.strokeStyle = 'rgba(224,64,122,' + a + ')';
+    cx.lineWidth = 4; cx.shadowColor = 'rgba(224,64,122,.7)'; cx.shadowBlur = 14;
+    cx.strokeRect(20 * TILE, 12 * TILE, 21 * TILE, 10 * TILE);
+    cx.restore();
+  }
+
+  // ⑦ 인물 — y 순으로 그려 앞뒤가 겹치게
+  drawPerson(CEO_SPOT.x, CEO_SPOT.y, 0, '#c9973f', '#f2c94c', '대표', true, true);
+  const sorted = [...emps].filter(e => e.onsite || e.goal)
+    .sort((a, b) => (a.y + a.seg) - (b.y + b.seg));
+  for (const e of sorted) {
+    let px = e.x, py = e.y;
+    if (e.path.length) { px = e.x + (e.path[0].x - e.x) * e.seg; py = e.y + (e.path[0].y - e.y) * e.seg; }
+    drawPerson(px, py, e.path.length ? performance.now() / 110 : 0,
+               DEPTS[e.dept].color, STATES[e.state].color, e.n, e.sitting, false);
+  }
+  for (const e of sorted) if (e.bubble) drawBubble(e);
+}
+
+/** 가구 — 종류별로 형태를 다르게 그린다(회의탁자/대표 책상/커피바/화분). */
+function drawFurniture(f) {
+  const px = f.x * TILE, py = f.y * TILE;
+  cx.fillStyle = 'rgba(0,0,0,.18)';
+  cx.fillRect(px + 1, py + TILE - 3, TILE - 2, 4);
+  if (f.k === 'table' || f.k === 'desk') {
+    const g = cx.createLinearGradient(px, py, px, py + TILE);
+    g.addColorStop(0, f.k === 'desk' ? '#a07a4e' : '#8d6a45');
+    g.addColorStop(1, f.k === 'desk' ? '#7d5c39' : '#6d5133');
+    cx.fillStyle = g;
+    cx.fillRect(px, py + 2, TILE, TILE - 4);
+    cx.strokeStyle = 'rgba(255,255,255,.14)'; cx.lineWidth = 1;
+    cx.beginPath(); cx.moveTo(px, py + 3.5); cx.lineTo(px + TILE, py + 3.5); cx.stroke();
+  } else if (f.k === 'coffee') {
+    cx.fillStyle = '#4f4262';
+    cx.fillRect(px + 1, py + 4, TILE - 2, TILE - 6);
+    cx.fillStyle = '#e8e6e0';
+    cx.font = '12px sans-serif'; cx.textAlign = 'center';
+    cx.fillText('☕', px + TILE / 2, py + TILE - 5); cx.textAlign = 'left';
+  } else {
+    cx.fillStyle = '#8a5a3a';
+    cx.fillRect(px + TILE / 2 - 4, py + TILE - 8, 8, 6);
+    cx.fillStyle = '#3d7a3d';
+    const leaves = [[-4, -3, 5], [4, -3, 5], [0, -7, 6]];
+    for (const lf of leaves) {
+      cx.beginPath(); cx.arc(px + TILE / 2 + lf[0], py + TILE / 2 + lf[1], lf[2], 0, 7); cx.fill();
+    }
+    cx.fillStyle = 'rgba(255,255,255,.12)';
+    cx.beginPath(); cx.arc(px + TILE / 2 - 2, py + TILE / 2 - 8, 2.5, 0, 7); cx.fill();
+  }
+}
+
+/** 자리 — 책상 + 모니터 + 등받이 의자. */
+function drawWorkstation(e) {
+  const d = e.desk, c = e.chair;
+  const dx = d.x * TILE, dy = d.y * TILE;
+  cx.fillStyle = 'rgba(0,0,0,.15)';
+  cx.fillRect(dx + 1, dy + TILE - 4, TILE - 2, 4);
+  const g = cx.createLinearGradient(dx, dy, dx, dy + TILE);
+  g.addColorStop(0, '#9c7b52'); g.addColorStop(1, '#7a5e3d');
+  cx.fillStyle = g;
+  cx.fillRect(dx + 1, dy + 4, TILE - 2, TILE - 7);
+  cx.fillStyle = '#2b3340';
+  cx.fillRect(dx + 4, dy + 1, TILE - 8, 7);
+  cx.fillStyle = DEPTS[e.dept].color;
+  cx.globalAlpha = 0.55; cx.fillRect(dx + 5, dy + 2, TILE - 10, 5); cx.globalAlpha = 1;
+  const cxp = c.x * TILE + TILE / 2, cyp = c.y * TILE + TILE / 2;
+  cx.fillStyle = '#55483a';
+  cx.beginPath();
+  cx.ellipse(cxp, cyp + 2, TILE * 0.30, TILE * 0.24, 0, 0, 7);
+  cx.fill();
+  cx.fillStyle = '#6b5c49';
+  cx.fillRect(cxp - TILE * 0.26, cyp - TILE * 0.30, TILE * 0.52, 3);
+}
+
+/** 인물 — 접지 그림자 + 몸통 그라디언트 + 머리/머리카락 + 상태 배지. */
+function drawPerson(tx, ty, bobT, bodyC, ringC, label, sit, isCeo) {
+  const x = tx * TILE + TILE / 2;
+  const bob = bobT ? Math.sin(bobT) * 1.6 : 0;
+  const y = ty * TILE + TILE / 2 + bob;
+
+  cx.fillStyle = 'rgba(0,0,0,.28)';
+  cx.beginPath();
+  cx.ellipse(x, ty * TILE + TILE / 2 + 8, 7 - Math.abs(bob) * 0.5, 3, 0, 0, 7);
+  cx.fill();
+
+  const bh = sit ? 9 : 11;
+  const g = cx.createLinearGradient(x, y - 3, x, y + bh);
+  g.addColorStop(0, shade(bodyC, 26)); g.addColorStop(1, shade(bodyC, -22));
+  cx.fillStyle = g;
+  cx.beginPath();
+  if (cx.roundRect) cx.roundRect(x - 6.5, y - 3, 13, bh, [5, 5, 3, 3]);
+  else cx.rect(x - 6.5, y - 3, 13, bh);
+  cx.fill();
+  cx.strokeStyle = 'rgba(0,0,0,.28)'; cx.lineWidth = 1; cx.stroke();
+
+  cx.fillStyle = '#f0d0ae';
+  cx.beginPath(); cx.arc(x, y - 7.5, 5, 0, 7); cx.fill();
+  cx.strokeStyle = 'rgba(0,0,0,.22)'; cx.stroke();
+  cx.fillStyle = isCeo ? '#3a2f22' : '#33291f';
+  cx.beginPath(); cx.arc(x, y - 8.6, 4.9, Math.PI * 1.03, Math.PI * 1.97); cx.fill();
+
+  cx.fillStyle = ringC;
+  cx.beginPath(); cx.arc(x + 6, y - 10, 3.1, 0, 7); cx.fill();
+  cx.strokeStyle = 'rgba(0,0,0,.45)'; cx.lineWidth = 1; cx.stroke();
+
+  // 축소 표시 중이면 이름을 생략한다 — 읽히지도 않으면서 화면만 지저분해진다
+  if (dispScale() >= 0.55) {
+    cx.font = '10px "Malgun Gothic", sans-serif';
+    cx.textAlign = 'center';
+    cx.lineWidth = 2.5; cx.strokeStyle = 'rgba(20,18,14,.72)';
+    cx.strokeText(label, x, y + bh + 8);
+    cx.fillStyle = '#fff';
+    cx.fillText(label, x, y + bh + 8);
+    cx.textAlign = 'left'; cx.lineWidth = 1;
+  }
+}
+
+/** 말풍선 — 흰 카드 + 꼬리 + 그림자. 화면 밖으로 나가지 않게 클램프. */
+function drawBubble(e) {
+  let px = e.x, py = e.y;
+  if (e.path.length) { px = e.x + (e.path[0].x - e.x) * e.seg; py = e.y + (e.path[0].y - e.y) * e.seg; }
+  const bx = px * TILE + TILE / 2, byRaw = py * TILE - 16;
+  cx.font = '11px "Malgun Gothic", sans-serif';
+  const words = e.bubble.text, lines = [];
+  for (let i = 0; i < words.length; i += 15) lines.push(words.slice(i, i + 15));
+  const w = Math.max(...lines.map(l => cx.measureText(l).width)) + 16;
+  const h = lines.length * 14 + 10;
+  const x0 = Math.min(Math.max(bx - w / 2, 3), COLS * TILE - w - 3);
+  const y0 = Math.max(byRaw - h, 3);
+
+  cx.save();
+  cx.shadowColor = 'rgba(0,0,0,.34)'; cx.shadowBlur = 7; cx.shadowOffsetY = 2;
+  cx.fillStyle = 'rgba(255,255,255,.97)';
+  cx.beginPath();
+  if (cx.roundRect) cx.roundRect(x0, y0, w, h, 7); else cx.rect(x0, y0, w, h);
+  cx.fill();
+  cx.restore();
+  cx.strokeStyle = 'rgba(0,0,0,.20)'; cx.lineWidth = 1; cx.stroke();
+
+  cx.fillStyle = 'rgba(255,255,255,.97)';
+  cx.beginPath();
+  cx.moveTo(bx - 5, y0 + h - 1); cx.lineTo(bx + 5, y0 + h - 1); cx.lineTo(bx, y0 + h + 6);
+  cx.fill();
+
+  cx.fillStyle = '#20242e';
+  lines.forEach((l, i) => cx.fillText(l, x0 + 8, y0 + 15 + i * 14));
+}
+
+/* ── 메인 루프 ──
+   rAF는 패널이 화면에 없으면 정지해 시뮬레이션까지 멈추므로 setInterval로 돌린다. */
+let lastT=performance.now();
+function loop(){
+  const t=performance.now();
+  const dt=Math.min((t-lastT)/1000,.1); lastT=t;
+  if(!paused){
+    for(let i=pendWaits.length-1;i>=0;i--){ pendWaits[i].left-=dt*1000*speed;
+      if(pendWaits[i].left<=0){ pendWaits[i].res(); pendWaits.splice(i,1); } }
+    updateEmps(dt); wanderAI(dt);
+    if(dayStarted&&!dayDone) simMin+=dt*speed*2;
+  }
+  draw(); refreshUI();
+}
+
+/* ── UI ── */
+const STEP_NAMES=['① --check 산출물 지문 확인','② 요구정의 — 질문 1개 확정','③ 수집 — 스냅샷 고정',
+  '④ 품질검사','⑤ EDA·통계','⑥ 피처 + 누수 검사','⑦ 모델링 — 베이스라인 먼저','⑧ 방법론 검수',
+  '⑨ 해석·리포팅','⑩ 현장·문체 검수 (동시)','⑪ ★ 대표 승인 ★','⑫ 재현성 고정 → 비서실 브리핑'];
+function refreshUI(){
+  const h=Math.floor(simMin/60)%24, m=Math.floor(simMin%60);
+  document.getElementById('clock').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  document.getElementById('dayLabel').textContent=dayDone?'퇴근':dayStarted?'근무 중':'출근 전';
+  const cnt={}; for(const k in STATES) cnt[k]=0;
+  for(const e of emps) cnt[e.state]++;
+  document.getElementById('stateSummary').innerHTML=Object.keys(STATES).map(k=>
+    `<span><span class="stDot" style="background:${STATES[k].color}"></span>${k} ${cnt[k]}</span>`).join('');
+  document.getElementById('stepList').innerHTML=STEP_NAMES.map((s,i)=>
+    `<div class="step ${i<curStep?'done':i===curStep?'now':''}">${i<curStep?'✔':i===curStep?'▶':'·'} ${s}</div>`).join('');
+  if(approvalPending){
+    const sec=Math.floor((performance.now()-approvalSince)/1000);
+    document.getElementById('approvalMsg').textContent=`★ 대표 승인 대기 — 검수 3팀장이 회의실에서 ${sec}초째 기다립니다.`;
+  }
+}
+function addMsg(who,text,me,pre){
+  const div=document.createElement('div'); div.className='msg'+(me?' me':'');
+  const color=me?'#f2c94c':(emps.find(e=>e.n===who)?DEPTS[emps.find(e=>e.n===who).dept].color:'#9aa3b5');
+  div.innerHTML=`<span class="who" style="color:${color}">${who}</span>`+(pre?`<pre>${text}</pre>`:`<span>${text}</span>`);
+  const log=document.getElementById('log'); log.appendChild(div); log.scrollTop=log.scrollHeight;
+}
+
+/* ── 회의 헬퍼 ── */
+async function meeting(names,lines){
+  const ms=names.map((n,i)=>({e:E(n),seat:MEET_SEATS[i]}));
+  for(const m of ms){ m.e.inMeeting=true; if(m.e.wandering) m.e.recall=true; }
+  await Promise.all(ms.map(m=>walkTo(m.e,m.seat.x,m.seat.y)));
+  for(const [n,t] of lines){ await say(E(n),t,2800); }
+  await Promise.all(ms.map(m=>walkTo(m.e,m.e.chair.x,m.e.chair.y)));
+  for(const m of ms) m.e.inMeeting=false;
+}
+async function handoff(fromName,toDept,text){
+  const e=E(fromName), d=roomOf(toDept).door;
+  await walkTo(e,d.x,d.y); await say(e,text,2200); await walkTo(e,e.chair.x,e.chair.y);
+}
+
+/* ── 하루 시나리오 (사규 §9) ── */
+async function runDay(){
+  if(dayStarted) return;
+  dayStarted=true;
+  document.getElementById('btnStart').disabled=true;
+  document.getElementById('btnPause').disabled=false;
+  addMsg('시스템','09:00 — 전원 출근합니다.');
+  // 출근: 순차 입장
+  for(const e of emps){ e.onsite=true; walkTo(e,e.chair.x,e.chair.y); await wait(150); }
+  while(emps.some(e=>e.goal)) await wait(200);
+
+  curStep=0; setDept(10,'진행 중'); await recallDept(10);
+  await say(E('탁현서'),'--check 돌렸습니다 — 낡은 리포트 없어요.');
+  await say(E('문상우'),'지문 확인 완료. 오늘 기준 산출물로 갑니다.');
+  setDept(10,'완료');
+
+  curStep=1; setDept(0,'진행 중'); await recallDept(0);
+  await say(E('한지훈'),'이 분석으로 뭘 결정하실 건가요?');
+  await say(E('조은결'),'질문이 2개인데요. 쪼갤까요?');
+  await say(E('한지훈'),"쪼개죠. 오늘은 '미탐 IDV 대체 감시' 하나로.");
+  setDept(0,'완료'); await handoff('조은결',1,'요구정의서 전달드려요.');
+
+  curStep=2; setDept(1,'데이터 대기'); await recallDept(1);
+  dataWaitMsg='GitHub 원격 데이터 스냅샷이 아직 없어 수집팀이 데이터 대기 중';
+  await say(E('신유빈'),'GitHub 원격 데이터 당겨오는 중… (데이터 대기)',3200);
+  dataWaitMsg=null; setDept(1,'진행 중');
+  await say(E('하도윤'),'원본은 안 건드렸습니다. 복제본이에요.');
+  await say(E('서민재'),'스냅샷 시각 박아뒀습니다.');
+  setDept(1,'완료'); await handoff('하도윤',2,'스냅샷 경로 전달합니다.');
+
+  curStep=3; setDept(2,'진행 중'); await recallDept(2);
+  await say(E('권나린'),'xmeas_09 상한 붙박이예요. 포화입니다.');
+  await say(E('남시우'),'타임스탬프 역전은 없네요.');
+  await say(E('노아름'),'포화 구간 마스킹하고 넘깁니다.');
+  setDept(2,'완료'); await handoff('권나린',3,'품질 리포트 전달해요.');
+
+  curStep=4; setDept(3,'진행 중'); await recallDept(3);
+  await say(E('백서윤'),'그림만 있고 수치가 없어요 — 검정 붙일게요.');
+  await say(E('고은택'),'이 상관은 열수지로 설명돼요. 기지로 분류.');
+  addMsg('시스템','EDA·통계팀 3명이 회의실에서 인수인계합니다.');
+  await meeting(['정해린','백서윤','고은택'],[
+    ['정해린','정상 대비 유의 변수 12개. 검정 통과만 넘깁니다.'],
+    ['백서윤','분포 비교표는 수치 붙여서 정리했어요.'],
+    ['고은택','미설명 상관 2건만 다음 팀에 표시해뒀습니다.']]);
+  setDept(3,'완료'); await handoff('백서윤',4,'검정 통과 변수 목록입니다.');
+
+  curStep=5; setDept(4,'진행 중'); await recallDept(4);
+  await say(E('류하진'),'미래 정보 들어갔습니다. 반려요.'); rejectCount++;
+  await say(E('배준혁'),"롤링 윈도우로 다시. 의미는 '냉각 지연'입니다.");
+  setDept(4,'완료'); await handoff('류하진',5,'피처 명세 전달합니다.');
+
+  curStep=6; setDept(5,'진행 중'); await recallDept(5);
+  await say(E('심재윤'),'단순 임계 F1 0.61이에요. 이거보다 나은가요?');
+  await say(E('표지안'),'random_state=42 확인했습니다.');
+  await say(E('윤도경'),'VAE가 베이스라인 +0.21. 넘깁니다.');
+  setDept(5,'완료'); await handoff('표지안',6,'모델 결과표 전달해요.');
+
+  curStep=7; setDept(6,'진행 중'); await recallDept(6);
+  await say(E('진세호'),'시간 경계 언제예요? 갭은요?');
+  await say(E('마유나'),'± 없는 단일 수치는 못 넘깁니다.'); rejectCount++;
+  await say(E('최시온'),'시드 3회 평균으로 다시 받았습니다. 통과.');
+  setDept(6,'완료'); await handoff('진세호',7,'검수 통과분 전달합니다.');
+
+  curStep=8; setDept(7,'진행 중'); await recallDept(7);
+  await say(E('천이든'),'상위 기여 변수는 xmeas_21인데, 원인은 아닙니다.');
+  await say(E('편도하'),"공정 조치로 바꾸면 '냉각수 라인 점검'이죠.");
+  await say(E('임세아'),'결론 수치부터 씁니다.');
+  setDept(7,'완료');
+
+  curStep=9; setDept(8,'진행 중'); setDept(9,'진행 중');
+  await recallDept(8); await recallDept(9);
+  flash(E('봉재희'),'태그명 다 붙어 있네요.',2600);
+  await say(E('감별이'),'1군 금칙어 0건입니다.');
+  flash(E('설우빈'),'미탐 2건이면 순회점검 1회 추가입니다.',2600);
+  await say(E('오다현'),"'학습 안정화' 하나만 고치죠.");
+  setDept(8,'완료'); setDept(9,'완료');
+
+  /* ⑪ 대표 승인 — 여기서 반드시 멈춘다 */
+  curStep=10;
+  addMsg('시스템','검수 3팀장이 회의실로 이동합니다. 대표 승인이 필요합니다.');
+  const gate=['최시온','강태섭','오다현'];
+  for(const n of gate){ E(n).inMeeting=true; E(n).state='승인 대기'; }
+  await Promise.all(gate.map((n,i)=>walkTo(E(n),MEET_SEATS[i].x,MEET_SEATS[i].y)));
+  for(const n of gate) E(n).bubble={text:'확인해주세요',until:Infinity};
+  approvalPending=true; approvalSince=performance.now();
+  document.getElementById('approvalBox').classList.add('show');
+  const choice=await new Promise(res=>approvalResolve=res);
+  approvalPending=false; decisionMade=choice;
+  document.getElementById('approvalBox').classList.remove('show');
+  for(const n of gate) E(n).bubble=null;
+  addMsg('대표',`[${choice}]`,true);
+
+  if(choice==='수정 요청'){
+    for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
+    setDept(7,'진행 중');
+    addMsg('임세아','수정 반영해서 다시 올리겠습니다.');
+    await say(E('임세아'),'수정 반영 중입니다.',3600);
+    setDept(7,'완료');
+    for(const n of gate){ E(n).inMeeting=true; E(n).state='승인 대기'; }
+    await Promise.all(gate.map((n,i)=>walkTo(E(n),MEET_SEATS[i].x,MEET_SEATS[i].y)));
+    approvalPending=true; approvalSince=performance.now();
+    document.getElementById('approvalBox').classList.add('show');
+    decisionMade=await new Promise(res=>approvalResolve=res);
+    approvalPending=false;
+    document.getElementById('approvalBox').classList.remove('show');
+    addMsg('대표',`[${decisionMade}]`,true);
+  }
+  for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
+
+  curStep=11;
+  if(decisionMade==='승인'){
+    setDept(10,'진행 중'); await recallDept(10);
+    await say(E('문상우'),'지문 기록했습니다. 재현 커맨드도요.');
+    setDept(10,'완료');
+  }
+  setDept(11,'진행 중'); await recallDept(11);
+  const sec=E('유하람'); sec.inMeeting=true;
+  await walkTo(sec,BRIEF_SPOT.x,BRIEF_SPOT.y);
+  await say(sec,'오늘 결정하실 건 1개였습니다.',3000);
+  addMsg('유하람',
+`① 오늘 완료: 12단계 중 ${decisionMade==='승인'?12:11}단계
+② 진행 중: 없음
+③ 대표 승인 대기: 0건 (처리됨 — ${decisionMade})
+④ 막힌 것: 반려 ${rejectCount}건(피처 누수 1·불확실성 1) → 재작업 완료
+⑤ 오늘 대표가 결정할 것: 승인 1건 (완료)`,false,true);
+  await walkTo(sec,sec.chair.x,sec.chair.y); sec.inMeeting=false;
+  setDept(11,'완료');
+  curStep=12; dayDone=true;
+  addMsg('시스템','하루 일과 종료. 15초 후 다음 날이 자동 시작됩니다.');
+  setTimeout(resetDay,15000);
+}
+
+/* ── 다음 날 리셋 — reload는 미리보기/아티팩트 컨텍스트에서 막힐 수 있어 상태만 초기화한다 ── */
+function resetDay(){
+  pendWaits.length=0;
+  dayStarted=false; dayDone=false; curStep=-1; simMin=9*60;
+  rejectCount=0; decisionMade=null; approvalPending=false; dataWaitMsg=null;
+  for(const e of emps) Object.assign(e,{x:ENTRY.x,y:ENTRY.y,path:[],seg:0,state:'대기',onsite:false,
+    sitting:false,inMeeting:false,wandering:false,recall:false,bubble:null,goal:null,resolver:null,stuck:0});
+  const b=document.getElementById('btnStart'); b.disabled=false; b.textContent='하루 시작';
+  document.getElementById('btnPause').disabled=true;
+  addMsg('시스템','── 다음 날 ── 3초 후 자동 출근합니다.');
+  setTimeout(()=>runDay(),3000);
+}
+
+/* ── 대표 지시창 (사규 §10) ── */
+function bottleneckAnswer(){
+  if(approvalPending){
+    const sec=Math.floor((performance.now()-approvalSince)/1000);
+    return `원인은 하나예요 — 대표님 결재 대기입니다. 회의실에서 3명이 ${sec}초째 기다리고 있어요. 승인만 눌러주시면 바로 다음 단계로 넘어갑니다.`;
+  }
+  if(dataWaitMsg) return `${dataWaitMsg}입니다. 스냅샷이 도착하면 자동으로 풀립니다.`;
+  if(!dayStarted) return `아직 출근 전입니다. '하루 시작'을 눌러주세요.`;
+  if(dayDone) return `지연 없습니다.`;
+  if(curStep>=0){ const active=DEPTS.findIndex((_,i)=>deptEmps(i).some(e=>e.state==='진행 중'));
+    const name=active>=0?DEPTS[active].name:'현재 단계';
+    return `${name} 작업 중 — 진행률 ${curStep+1}/12. 정상 속도입니다.`; }
+  return `지연 없습니다.`;
+}
+async function inspectionMeeting(){
+  addMsg('시스템','검수 3팀장을 회의실로 소집합니다.');
+  await meeting(['최시온','강태섭','오다현'],[
+    ['최시온','방법론: ± 없는 단일 수치가 제 반려 1순위입니다.'],
+    ['강태섭','현장: 태그명·롤백 조건 없으면 못 내보냅니다.'],
+    ['오다현','문체: 1군 금칙어는 한 개라도 반려예요.']]);
+  addMsg('시스템','검수 소집 회의가 끝났습니다.');
+}
+let sideBusy=false;
+function handleCommand(raw){
+  const q=raw.trim(); if(!q) return;
+  addMsg('대표',q,true);
+  const t=q.replace(/\s/g,'');
+  if(t.includes('현황')){
+    const step=curStep<0?'출근 전':curStep>=12?'종료':STEP_NAMES[curStep];
+    addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/12 — ${step}. 다음은 ${curStep+1<12?STEP_NAMES[Math.min(curStep+1,11)]:'퇴근'}입니다.`);
+    return; }
+  if(t.includes('왜')&&(t.includes('막')||t.includes('늦'))){ addMsg('유하람',bottleneckAnswer()); return; }
+  if(t.includes('수치')||t.includes('어디서')){
+    addMsg('문상우',`data/models/comparison.json (2026-07-01 17:14, sha256 87522ad05634)에서 나왔습니다. 재현: python -m src.report.daily_report --check`);
+    return; }
+  if(t.includes('한계')||t.includes('근거')){
+    addMsg('임세아',`결함모드별 재현율 원표입니다 — 완전 미탐: IDV 3(0.00)·IDV 18(0.00) / 취약: IDV 2(0.79)·8(0.71)·12(0.56) / 완전 탐지: IDV 4·6·7·14(1.00). 출처 comparison.json.`);
+    return; }
+  if(t.includes('검수소집')||t.includes('회의소집')){
+    if(approvalPending){ addMsg('유하람','지금은 승인 회의가 진행 중입니다. 결재부터 부탁드려요.'); return; }
+    if(!dayStarted){ addMsg('유하람','출근 전이라 소집이 어렵습니다.'); return; }
+    if(sideBusy){ addMsg('유하람','이미 회의 중입니다.'); return; }
+    sideBusy=true; inspectionMeeting().finally(()=>sideBusy=false); return; }
+  if(t.includes('집중')){
+    let n=0; for(const e of emps) if(e.wandering){ e.recall=true; n++; }
+    addMsg('유하람',n?`라운지의 ${n}명을 자리로 복귀시켰습니다.`:'전원 자리에 있습니다.'); return; }
+  for(let d=0;d<12;d++){
+    if(t.includes(DEPTS[d].name.replace(/\s/g,''))||t.includes(DEPTS[d].short)){
+      const lead=deptEmps(d).find(e=>e.lead), mem=deptEmps(d);
+      addMsg(lead.n,`${DEPTS[d].name} 현황: `+mem.map(e=>`${e.n} ${e.wandering?'라운지☕':e.state}`).join(' · ')+`. "${lead.buzz}"`);
+      return; } }
+  const who=emps.find(e=>t.includes(e.n)||t.includes(e.c));
+  if(who){ addMsg(who.n,`지금 ${who.wandering?'라운지에서 커피 마시는 중입니다':who.state+' 상태입니다'}. "${who.buzz}"`); return; }
+  addMsg('유하람','질문을 못 알아들었어요. "현황 보고" / "왜 막혔어?" / "검수 소집" / 부서명이나 직원 이름으로 물어보세요.');
+}
+
+/* ── 자동 시작 — 시작은 자동, 멈추는 곳은 ⑪ 대표 승인뿐 ── */
+let autoLeft=5;
+const autoTimer=setInterval(()=>{
+  if(dayStarted){ clearInterval(autoTimer); return; }
+  autoLeft--;
+  if(autoLeft<=0){ clearInterval(autoTimer); document.getElementById('btnStart').textContent='하루 시작'; runDay(); }
+  else document.getElementById('btnStart').textContent=`하루 시작 (${autoLeft}초 후 자동)`;
+},1000);
+
+/* ── 이벤트 ── */
+document.getElementById('btnStart').onclick=()=>{ clearInterval(autoTimer); runDay(); };
+document.getElementById('btnPause').onclick=function(){ paused=!paused; this.textContent=paused?'재개':'일시정지'; };
+document.querySelectorAll('.spd').forEach(b=>b.onclick=function(){
+  speed=+this.dataset.s;
+  document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('speedOn',x===this)); });
+for(const id of ['btnApprove','btnRevise','btnHold','btnDiscard']){
+  document.getElementById(id).onclick=()=>{ if(approvalResolve){
+    const map={btnApprove:'승인',btnRevise:'수정 요청',btnHold:'보류',btnDiscard:'폐기'};
+    const r=approvalResolve; approvalResolve=null; r(map[id]); } };
+}
+document.querySelectorAll('#quickBtns button').forEach(b=>b.onclick=()=>handleCommand(b.dataset.q));
+document.getElementById('btnSend').onclick=()=>{ const i=document.getElementById('cmdInput'); handleCommand(i.value); i.value=''; };
+document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ handleCommand(e.target.value); e.target.value=''; } });
+
+/* ── 초기화 ── */
+buildMap(); buildEmps();
+addMsg('유하람','사규 32명 편성으로 대기 중입니다. 5초 후 자동 출근합니다 — ⑪ 대표 승인에서만 기다릴게요.');
+document.getElementById('btnStart').textContent='하루 시작 (5초 후 자동)';
+setInterval(loop,33);
+</script>
+</body>
+</html>
