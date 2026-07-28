@@ -78,7 +78,7 @@
         <button class="spd" data-s="4">4x</button>
       </div>
     </div>
-    <div class="sec"><h3>직원 상태 32명</h3><div id="stateSummary"></div></div>
+    <div class="sec"><h3>직원 상태 34명</h3><div id="stateSummary"></div></div>
     <div class="sec"><h3>하루 시나리오 <span id="stepCount">12단계</span></h3><div id="stepList"></div>
       <div id="approvalBox">
         <p id="approvalTitle">★ 대표 승인 대기</p>
@@ -110,7 +110,7 @@
 "use strict";
 /* ══════════════════════════════════════════════════════════
    제조 데이터 분석팀 오피스 — AI_COMPANY.md(mfg-anomaly-workflow) 사규 시각화
-   32명(팀장12+팀원20) · 상태 5종 · 하루 12단계 · 대표 지시창
+   34명(팀장13+팀원21) · 상태 5종 · 하루 12단계 · 대표 지시창
    규칙: ⑪ 대표 승인에서 반드시 멈춘다 / 회의 참석자는 자율 행동 금지
    ══════════════════════════════════════════════════════════ */
 const TILE = 22, COLS = 61, ROWS = 34;
@@ -158,6 +158,8 @@ const DEPTS = [
   { name:'문체 검수팀',     short:'문체검수', color:'#a26769' },
   { name:'재현성·운영팀',   short:'재현성',   color:'#6d9dc5' },
   { name:'비서실',          short:'비서실',   color:'#84a59d' },
+  // 신설 — 기획 전담. 산출물·이월 대장만 근거로 후보를 내고, 없는 과제를 지어내지 않는다.
+  { name:'과제발굴팀',      short:'과제발굴', color:'#d98f5a' },
 ];
 const ROSTER = [
   {n:'한지훈',c:'한요구',d:0,lead:1,buzz:'이 분석으로 뭘 결정하실 건가요?'},
@@ -192,6 +194,8 @@ const ROSTER = [
   {n:'여단우',c:'여실패',d:10,lead:0,buzz:'실패를 성공으로 안 적습니다.'},
   {n:'유하람',c:'유비서',d:11,lead:1,buzz:'오늘 결정하실 건 1개입니다.'},
   {n:'구소명',c:'구취합',d:11,lead:0,buzz:'중복 설명은 지웠습니다.'},
+  {n:'예지완',c:'예발굴',d:12,lead:1,buzz:'그거 어느 파일에 적혀 있습니까?'},
+  {n:'도서진',c:'도대장',d:12,lead:0,buzz:'이월 대장에 있는 것만 올립니다.'},
 ];
 
 /* ── 지도 ── */
@@ -210,6 +214,8 @@ function buildMap(){
   for(let x=1;x<=14;x++){ if(x!==7) W(x,12); if(x!==7) W(x,21); }
   for(let y=12;y<=21;y++) W(14,y);
   for(let y=12;y<=21;y++){ W(20,y); W(40,y); }
+  // 과제발굴팀 방(x15~19, y13~20) — 위/아래를 막고 아래쪽 x17에 문 하나
+  for(let x=15;x<=19;x++){ W(x,12); if(x!==17) W(x,21); }
   for(let x=21;x<=39;x++){ if(x!==30) W(x,12); if(x!==30) W(x,21); }
   for(let y=12;y<=21;y++){ if(y!==16&&y!==17) W(46,y); }
   for(let x=47;x<=59;x++){ W(x,12); W(x,21); }
@@ -217,7 +223,8 @@ function buildMap(){
   for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
     if(y>=1&&y<=8) tint[y][x]='room';
     if(y>=25&&y<=32) tint[y][x]='room';
-    if(y>=13&&y<=20){ if(x>=1&&x<=13) tint[y][x]='lounge'; if(x>=21&&x<=39) tint[y][x]='meet'; if(x>=47&&x<=59) tint[y][x]='ceo'; }
+    if(y>=13&&y<=20){ if(x>=1&&x<=13) tint[y][x]='lounge'; if(x>=21&&x<=39) tint[y][x]='meet'; if(x>=47&&x<=59) tint[y][x]='ceo';
+      if(x>=15&&x<=19) tint[y][x]='room'; }
   }
   // 가구
   furn.push({x:27,y:16,k:'table'},{x:28,y:16,k:'table'},{x:29,y:16,k:'table'},{x:30,y:16,k:'table'},
@@ -229,9 +236,14 @@ function buildMap(){
   for(const f of furn) W(f.x,f.y);
 }
 /* 부서 방 좌표: 0~5 상단, 6~11 하단 */
-function roomOf(d){ const top=d<6, j=top?d:d-6, wx=j*10;
+const DISCOVERY_ROOM = { wx:15, door:{x:17,y:21}, label:{x:17,y:16.4} };
+function roomOf(d){
+  if(d===12) return { ...DISCOVERY_ROOM, top:true };   // 중앙 밴드 특례
+  const top=d<6, j=top?d:d-6, wx=j*10;
   return { wx, top, door:{x:wx+5,y:top?9:24}, label:{x:wx+5,y:top?6.6:27.4} }; }
-function deskSpots(d,count){ const r=roomOf(d), dy=r.top?2:31, cy=r.top?3:30;
+function deskSpots(d,count){
+  if(d===12) return [{desk:{x:16,y:14},chair:{x:16,y:15}},{desk:{x:18,y:14},chair:{x:18,y:15}}];
+  const r=roomOf(d), dy=r.top?2:31, cy=r.top?3:30;
   const xs = count===3? [r.wx+2,r.wx+5,r.wx+8] : [r.wx+3,r.wx+7];
   return xs.map(x=>({desk:{x,y:dy}, chair:{x,y:cy}})); }
 const MEET_SEATS=[{x:28,y:15},{x:30,y:15},{x:32,y:15},{x:28,y:18},{x:30,y:18},{x:32,y:18}];
@@ -243,7 +255,7 @@ const emps=[];
 function buildEmps(){
   const perDept={};
   for(const r of ROSTER){ (perDept[r.d]=perDept[r.d]||[]).push(r); }
-  for(let d=0;d<12;d++){ const list=perDept[d], spots=deskSpots(d,list.length);
+  for(let d=0;d<DEPTS.length;d++){ const list=perDept[d], spots=deskSpots(d,list.length);
     list.forEach((r,i)=>{ emps.push({ ...r, id:emps.length, dept:d,
       desk:spots[i].desk, chair:spots[i].chair,
       x:ENTRY.x, y:ENTRY.y, path:[], seg:0, state:'대기', onsite:false, sitting:false,
@@ -409,7 +421,7 @@ function draw() {
   // ⑤ 방 라벨 — 바닥 위에 옅게 새긴다
   cx.textAlign = 'center';
   cx.font = 'bold 13px "Malgun Gothic", sans-serif';
-  for (let d = 0; d < 12; d++) {
+  for (let d = 0; d < DEPTS.length; d++) {
     const r = roomOf(d);
     cx.fillStyle = 'rgba(255,255,255,.30)';
     cx.fillText(DEPTS[d].short, r.label.x * TILE + TILE / 2, r.label.y * TILE + 1);
@@ -734,10 +746,10 @@ async function requestApproval(cfg) {
   bbox.innerHTML = cfg.options.map(o =>
     `<button data-act="${o.id}" class="${o.cls || ''}">${o.label}</button>`).join('');
   document.getElementById('approvalBox').classList.add('show');
-  syncGateButtons();
 
   const res = await new Promise(resolve => {
     approvalGate = { cfg, resolve, since: performance.now(), pick: null };
+    syncGateButtons();   // 게이트가 설정된 뒤라야 잠금이 계산된다
   });
 
   approvalGate = null;
@@ -763,24 +775,38 @@ function syncGateButtons() {
    반환: 채택된 과제 ctx, 또는 null(전부 반려 → 오늘 착수 없음). */
 async function runPrologue(my) {
   const isA = mode === 'A';
-  const teams = isA ? ['한지훈','정해린','윤도경'] : ['최시온','강태섭','문상우'];
+  // 발굴팀장이 주재하고, 관점이 다른 팀장 3명이 함께 모인다.
+  // 발굴팀 단독으로 정하면 '어느 파일에 있나'만 보게 되고, 관점 팀장만 모이면
+  // 각자 자기 팀 관심사로 기운다 — 그래서 넷이 같이 앉는다.
+  const host = '예지완';
+  const perspectives = isA ? ['한지훈','정해린','윤도경'] : ['최시온','강태섭','문상우'];
+  const teams = [host, ...perspectives];
 
   step('pScan');
-  setDept(10,'진행 중'); await recallDept(10);
-  await say(E('문상우'), isA ? '지금 회사가 가진 산출물 펼칩니다.' : '미해결 대장 꺼냈습니다 — 미측정·이관 항목요.');
+  setDept(12,'진행 중'); setDept(10,'진행 중'); await recallDept(12); await recallDept(10);
+  await say(E('도서진'), isA ? '보유 산출물 목록 뽑았습니다.' : '이월 대장 꺼냈습니다 — 미측정·이관 항목요.');
+  await say(E('예지완'), '그거 어느 파일에 적혀 있습니까?', 2200);
+  await handoff('도서진', 10, '재현성팀에 지문 대조 요청합니다.');
+  await say(E('문상우'), '대조했습니다. 이 목록이 지금 회사가 가진 전부예요.');
   setDept(10,'완료');
   if (my !== dayEpoch) return null;
 
   step('pIdeate');
-  addMsg('시스템', isA ? '기획 회의 — 팀장 3명이 각자 과제를 냅니다.'
-                       : '회고 회의 — 검수 3팀장이 개선 과제를 냅니다.');
+  addMsg('시스템', isA ? '기획 회의 — 과제발굴팀장 주재, 요구정의·EDA·모델링 팀장이 각자 과제를 냅니다.'
+                       : '회고 회의 — 과제발굴팀장 주재, 검수 3팀장이 개선 과제를 냅니다.');
   const pool = PLAN_POOL[isA ? 'A' : 'B'];
-  await meeting(teams, teams.map((n, i) => [n, pool[i].label]));
+  await meeting(teams, [
+    [host, isA ? '대장에 적힌 것만 올립니다. 발명 금지입니다.'
+               : '지난 리포트가 스스로 미측정이라 적은 것만 봅니다.'],
+    ...perspectives.map((n, i) => [n, pool[i].label]),
+  ]);
   if (my !== dayEpoch) return null;
 
   step('pFilter');
   await say(E(isA ? '한지훈' : '최시온'),
             isA ? '셋 다 결정 사항이 있습니다. 통과.' : '셋 다 예상 델타를 씁니다. 통과.');
+  await say(E(host), '근거 파일 경로도 셋 다 붙었습니다.', 2200);
+  setDept(12,'완료');
   if (my !== dayEpoch) return null;
 
   step('pAdopt');
@@ -1029,7 +1055,7 @@ function handleCommand(raw){
       addMsg('유하람',`${MODE_LABEL[want]}로 바꿨습니다.`); return; }
     nextMode=want;
     addMsg('유하람',`하루 중간 전환은 안 합니다. 내일부터 ${MODE_LABEL[want]}로 예약했습니다.`); return; }
-  for(let d=0;d<12;d++){
+  for(let d=0;d<DEPTS.length;d++){
     if(t.includes(DEPTS[d].name.replace(/\s/g,''))||t.includes(DEPTS[d].short)){
       const lead=deptEmps(d).find(e=>e.lead), mem=deptEmps(d);
       addMsg(lead.n,`${DEPTS[d].name} 현황: `+mem.map(e=>`${e.n} ${e.wandering?'라운지☕':e.state}`).join(' · ')+`. "${lead.buzz}"`);
@@ -1073,7 +1099,7 @@ document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='
 
 /* ── 초기화 ── */
 buildMap(); buildEmps();
-addMsg('유하람','사규 32명 편성으로 대기 중입니다. 5초 후 자동 출근합니다 — ⑪ 대표 승인에서만 기다릴게요.');
+addMsg('유하람','사규 34명 편성으로 대기 중입니다. 5초 후 자동 출근합니다 — ⑪ 대표 승인에서만 기다릴게요.');
 document.getElementById('btnStart').textContent='하루 시작 (5초 후 자동)';
 setInterval(loop,33);
 </script>
