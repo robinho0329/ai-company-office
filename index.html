@@ -49,6 +49,7 @@
   .choice.sel { border-color:#f2c94c; background:#3f3547; }
   .choice b { color:#f2c94c; }
   .choice span { color:#a89ab5; }
+  .choice .doWhat { color:#7fd6b8; }
   #btnApprove, .btnOk { background:#2a9d6f; border-color:#2a9d6f; }
   #btnRevise { background:#c98a2a; border-color:#c98a2a; }
   #btnDiscard { background:#a04040; border-color:#a04040; }
@@ -102,6 +103,9 @@
         <button data-q="집중 모드">집중 모드</button>
         <button data-q="모드 B로">모드 전환</button>
         <button data-q="후보 출처">후보 출처</button>
+        <button data-q="대상 프로젝트">대상 프로젝트</button>
+        <button data-q="저장소 목록">저장소 목록</button>
+        <button data-q="지시서">지시서</button>
       </div>
       <div id="cmdRow">
         <input id="cmdInput" placeholder='예: "모델링팀 뭐해?" / "왜 막혔어?"'>
@@ -700,6 +704,10 @@ async function handoff(fromName,toDept,text){
    실제 리포트(daily_20260728.md)가 스스로 '미측정·이관'이라 적어둔 항목과,
    반복 평가가 드러낸 취약 결함모드만 근거로 삼는다. 없는 과제를 지어내지 않는다. */
 let planSource = { kind:'예시', detail:'candidates.json 미로드 — 내장 예시' };
+let planProject = null;   // {name, remote, commit} — 오늘 어느 저장소를 보는가
+let planProjects = [];    // 스캔된 저장소 전체 [{project, A, B}, …]
+let projectIdx = 0;       // 오늘 볼 저장소. 하루가 끝나면 다음으로 넘어간다
+let scannedRepos = [];    // 후보가 없는 것 포함, 스캔한 저장소 이름
 
 /** 실제 산출물에서 뽑은 후보를 읽어온다.
  *  src/report/discover.py 가 리포트·repeat_eval 을 파싱해 만든 파일이다.
@@ -709,20 +717,34 @@ async function loadCandidates() {
     const res = await fetch('candidates.json', { cache:'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const d = await res.json();
-    if (!d.A || !d.B) throw new Error('형식 불일치');
-    if (!d.A.length && !d.B.length) throw new Error('후보 0개');
-    PLAN_POOL.A = d.A.length ? d.A : PLAN_POOL.A;
-    PLAN_POOL.B = d.B.length ? d.B : PLAN_POOL.B;
+    planProjects = Array.isArray(d.projects) && d.projects.length
+      ? d.projects
+      : (d.A || d.B ? [{ project: d.project, A: d.A || [], B: d.B || [] }] : []);
+    scannedRepos = d.scanned_repos || planProjects.map(p => p.project && p.project.name);
+    if (!planProjects.length) throw new Error('후보 0개');
+    projectIdx = projectIdx % planProjects.length;
+    const cur = planProjects[projectIdx];
+    // 후보가 없는 모드는 내장 예시를 남겨 화면이 비지 않게 한다
+    PLAN_POOL.A = cur.A.length ? cur.A : PLAN_POOL.A;
+    PLAN_POOL.B = cur.B.length ? cur.B : PLAN_POOL.B;
+    planProject = cur.project || null;
     planSource = { kind:'실측', detail:`${d.source_report} · ${d.generated.slice(0,16)}`,
                    blanks: d.blanks_for_owner || [] };
-    addMsg('도서진', `이월 대장 로드 완료 — 근거: ${d.source_report}`);
+    addMsg('도서진', `저장소 ${scannedRepos.length}개 스캔 완료, 후보가 있는 곳 ${planProjects.length}개. ` +
+                     `오늘 볼 곳: ${planProject ? planProject.name : '(미상)'} (${projectIdx+1}/${planProjects.length})`);
   } catch (e) {
     planSource = { kind:'예시', detail:`candidates.json 로드 실패(${e.message}) — 내장 예시로 진행` };
   }
   const el = document.getElementById('planSrc');
   if (el) {
-    el.textContent = planSource.kind === '실측' ? `후보 출처: 실측 · ${planSource.detail}`
-                                                : `후보 출처: ${planSource.detail}`;
+    const nth = planProjects.length > 1 ? ` (${projectIdx+1}/${planProjects.length})` : '';
+    const proj = planProject
+      ? `<b>대상 프로젝트: ${planProject.name}${nth}</b>` +
+        (planProject.commit ? ` <span style="opacity:.7">@${planProject.commit}</span>` : '') + '<br>'
+      : '';
+    el.innerHTML = proj + (planSource.kind === '실측'
+      ? `후보 출처: 실측 · ${planSource.detail}`
+      : `후보 출처: ${planSource.detail}`);
     el.className = planSource.kind === '실측' ? 'srcReal' : 'srcDemo';
   }
 }
@@ -775,6 +797,7 @@ async function requestApproval(cfg) {
   const cbox = document.getElementById('approvalChoices');
   cbox.innerHTML = (cfg.choices || []).map((c, i) =>
     `<div class="choice" data-i="${i}"><b>${c.label}</b><br><span>${c.note}</span>` +
+    (c.action ? `<br><span class="doWhat">채택 시 → ${c.action}</span>` : '') +
     (c.source ? `<br><span style="color:#7f93a8">출처 ${c.source}</span>` : '') +
     `</div>`).join('');
   const bbox = document.getElementById('approvalBtns');
@@ -848,7 +871,7 @@ async function runPrologue(my) {
   addMsg('시스템','대표 채택이 필요합니다 — 3안 중 1개를 고르거나 전부 반려하세요.');
   const r = await requestApproval({
     title: (isA ? '★ 기획 채택 대기' : '★ 개선 과제 채택 대기')
-           + ` [${planSource.kind}] —`,
+           + ` · ${planProject ? planProject.name : '대상 미상'} [${planSource.kind}] —`,
     seats: teams, highlight:'meet', bubble:'골라주세요',
     choices: pool,
     options: [{ id:'채택', label:'채택', cls:'btnOk', needsPick:true },
@@ -861,8 +884,35 @@ async function runPrologue(my) {
     addMsg('유하람','전부 반려되어 오늘은 착수하지 않습니다. 내일 다시 기획하겠습니다.');
     return null;
   }
-  addMsg('유하람', `채택: ${r.pick.label} — 질문 "${r.pick.question}"`);
+  addMsg('유하람', `채택: ${r.pick.label}`);
+  emitWorkOrder(r.pick, isA);
   return r.pick;
+}
+
+/** 채택 결과를 '작업 지시서'로 남긴다.
+ *  이 화면은 코드를 고치지 못한다. 그러므로 채택의 산출물은 **사람이 복사해
+ *  실제 작업 세션에 붙여넣을 수 있는 텍스트**여야 한다. 그래야 채택이
+ *  화면 안에서 끝나지 않는다. */
+function emitWorkOrder(pick, isA) {
+  const proj = planProject ? planProject.name : '(대상 미상)';
+  const at = planProject && planProject.commit ? ` @${planProject.commit}` : '';
+  const blanks = (planSource.blanks || []).map(b => `  - [ ] ${b}`).join('\n')
+    || '  - [ ] (없음)';
+  const order =
+`[작업 지시서] ${proj}${at}
+모드: ${isA ? 'A · 신규 기획' : 'B · 기존 디벨롭'}   후보 출처: ${planSource.kind}
+채택 과제: ${pick.label}
+질문: ${pick.question}
+근거: ${pick.note}
+출처: ${pick.source || '(없음)'}
+대상 태그: ${pick.tags || '(미판정)'}
+할 일: ${pick.action || '(미정)'}
+대표가 채워야 할 값:
+${blanks}`;
+  addMsg('예지완', order, false, true);
+  addMsg('유하람', '위 지시서를 복사해 작업 세션에 붙여넣으시면 실제로 진행됩니다. ' +
+                   '이 화면은 코드를 고치지 못합니다.');
+  window.__lastWorkOrder = order;   // 지시창 '지시서' 로 다시 꺼낼 수 있다
 }
 
 /* ── 하루 시나리오 (사규 §9) ── */
@@ -1026,6 +1076,7 @@ function resetDay(){
   dayStarted=false; dayDone=false; curStep=-1; simMin=9*60;
   rejectCount=0; decisionMade=null; dataWaitMsg=null; decisions=[]; ctx=null;
   if(nextMode){ mode=nextMode; nextMode=null; }   // 예약된 모드는 다음 날부터 적용
+  if(planProjects.length) projectIdx=(projectIdx+1)%planProjects.length;  // 내일은 다음 저장소
   steps=(mode==='F'?[]:PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
   for(const e of emps) Object.assign(e,{x:ENTRY.x,y:ENTRY.y,path:[],seg:0,state:'대기',onsite:false,
     sitting:false,inMeeting:false,wandering:false,recall:false,bubble:null,goal:null,resolver:null,stuck:0});
@@ -1068,6 +1119,28 @@ function handleCommand(raw){
     addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/${steps.length} — ${cur}. 다음은 ${nxt}입니다.`);
     return; }
   if(t.includes('왜')&&(t.includes('막')||t.includes('늦'))){ addMsg('유하람',bottleneckAnswer()); return; }
+  if(t.includes('지시서')||t.includes('작업지시')){
+    if(window.__lastWorkOrder){ addMsg('예지완', window.__lastWorkOrder, false, true); }
+    else addMsg('예지완','아직 채택된 과제가 없습니다. 채택 후에 지시서가 나옵니다.');
+    return; }
+  if(t.includes('저장소목록')||t.includes('저장소리스트')||t.includes('전체저장소')){
+    if(!planProjects.length){ addMsg('예지완','아직 스캔 결과를 못 읽었습니다.'); return; }
+    addMsg('예지완', `스캔 ${scannedRepos.length}개 · 후보 있는 곳 ${planProjects.length}개\n` +
+      planProjects.map((p,i)=>`${i===projectIdx?'▶':' '} ${p.project.name} — 신규 ${p.A.length} / 개선 ${p.B.length}`).join('\n'),
+      false, true);
+    return; }
+  const jump = planProjects.findIndex(p=>p.project && t.includes(p.project.name.replace(/[-_]/g,'')));
+  if(jump>=0 && (t.includes('보자')||t.includes('전환')||t.includes('바꿔'))){
+    if(dayStarted&&!dayDone){ addMsg('유하람','하루 중간 전환은 안 합니다. 내일 이 저장소부터 봅니다.');
+      projectIdx=(jump-1+planProjects.length)%planProjects.length; return; }
+    projectIdx=jump; loadCandidates();
+    addMsg('예지완',`${planProjects[jump].project.name} 로 바꿨습니다.`); return; }
+  if(t.includes('프로젝트')||t.includes('대상')){
+    addMsg('예지완', planProject
+      ? `대상은 ${planProject.name}${planProject.commit?' @'+planProject.commit:''} 하나입니다. ` +
+        `${planProject.remote||''} · 근거 리포트 ${planSource.detail}`
+      : '대상 프로젝트를 아직 못 읽었습니다. candidates.json 을 로드해야 합니다.');
+    return; }
   if(t.includes('후보')||t.includes('근거출처')||t.includes('대장')){
     addMsg('예지완', planSource.kind==='실측'
       ? `실측입니다. ${planSource.detail} 에서 뽑았습니다. 지어낸 후보는 없습니다.`
