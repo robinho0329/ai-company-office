@@ -688,7 +688,11 @@ function addMsg(who,text,me,pre){
 
 /* ── 회의 헬퍼 ── */
 async function meeting(names,lines){
-  const ms=names.map((n,i)=>({e:E(n),seat:MEET_SEATS[i]}));
+  // 이름이 하나라도 없으면 아래에서 undefined 를 건드려 코루틴이 통째로 죽는다.
+  // 화면은 그 단계에서 영원히 멈춘 것처럼 보이므로, 여기서 걸러 원인을 남긴다.
+  const missing=names.filter(n=>!E(n));
+  if(missing.length){ addMsg('시스템',`회의 소집 실패 — 없는 직원: ${missing.join(', ')}`); return; }
+  const ms=names.slice(0,MEET_SEATS.length).map((n,i)=>({e:E(n),seat:MEET_SEATS[i]}));
   for(const m of ms){ m.e.inMeeting=true; if(m.e.wandering) m.e.recall=true; }
   await Promise.all(ms.map(m=>walkTo(m.e,m.seat.x,m.seat.y)));
   for(const [n,t] of lines){ await say(E(n),t,2800); }
@@ -852,11 +856,18 @@ async function runPrologue(my) {
   step('pIdeate');
   addMsg('시스템', isA ? '기획 회의 — 과제발굴팀장 주재, 요구정의·EDA·모델링 팀장이 각자 과제를 냅니다.'
                        : '회고 회의 — 과제발굴팀장 주재, 검수 3팀장이 개선 과제를 냅니다.');
-  const pool = PLAN_POOL[isA ? 'A' : 'B'];
-  await meeting(teams, [
-    [host, isA ? '대장에 적힌 것만 올립니다. 발명 금지입니다.'
-               : '지난 리포트가 스스로 미측정이라 적은 것만 봅니다.'],
-    ...perspectives.map((n, i) => [n, pool[i].label]),
+  // 후보 수는 저장소마다 다르다(0~3). 3개를 전제하면 pool[i] 가 undefined 가 되어
+  // 회의 도중 예외가 나고, 코루틴이 조용히 죽어 화면이 이 단계에서 멈춘다.
+  const pool = PLAN_POOL[isA ? 'A' : 'B'] || [];
+  if (!pool.length) {
+    await say(E(host), '근거가 남은 항목이 없습니다. 오늘은 올릴 후보가 없어요.', 3000);
+    return null;                       // 후보 0개 — 지어내지 않고 하루를 접는다
+  }
+  const speakers = perspectives.slice(0, pool.length);
+  await meeting([host, ...speakers], [
+    [host, isA ? `대장에 적힌 것만 올립니다. 오늘은 ${pool.length}건입니다.`
+               : `스스로 미측정이라 적은 것만 봅니다. 오늘은 ${pool.length}건입니다.`],
+    ...speakers.map((n, i) => [n, pool[i].label]),
   ]);
   if (my !== dayEpoch) return null;
 
@@ -916,6 +927,17 @@ ${blanks}`;
 }
 
 /* ── 하루 시나리오 (사규 §9) ── */
+/** runDay 래퍼 — 코루틴이 예외로 죽으면 화면은 '멈춘 것처럼' 보일 뿐 아무 표시가 없다.
+ *  여기서 붙잡아 지시창에 남기고 하루를 정리한다. */
+function startDay(){
+  runDay().catch(err => {
+    console.error(err);
+    addMsg('시스템', `오류로 하루가 중단됐습니다 — ${err && err.message ? err.message : err}`);
+    dayDone = true;
+    setTimeout(resetDay, 15000);
+  });
+}
+
 async function runDay(){
   if(dayStarted) return;
   dayStarted=true;
@@ -1083,7 +1105,7 @@ function resetDay(){
   const b=document.getElementById('btnStart'); b.disabled=false; b.textContent='하루 시작';
   document.getElementById('btnPause').disabled=true;
   addMsg('시스템','── 다음 날 ── 3초 후 자동 출근합니다.');
-  setTimeout(()=>runDay(),3000);
+  setTimeout(startDay,3000);
 }
 
 /* ── 대표 지시창 (사규 §10) ── */
@@ -1185,12 +1207,12 @@ let autoLeft=5;
 const autoTimer=setInterval(()=>{
   if(dayStarted){ clearInterval(autoTimer); return; }
   autoLeft--;
-  if(autoLeft<=0){ clearInterval(autoTimer); document.getElementById('btnStart').textContent='하루 시작'; runDay(); }
+  if(autoLeft<=0){ clearInterval(autoTimer); document.getElementById('btnStart').textContent='하루 시작'; startDay(); }
   else document.getElementById('btnStart').textContent=`하루 시작 (${autoLeft}초 후 자동)`;
 },1000);
 
 /* ── 이벤트 ── */
-document.getElementById('btnStart').onclick=()=>{ clearInterval(autoTimer); runDay(); };
+document.getElementById('btnStart').onclick=()=>{ clearInterval(autoTimer); startDay(); };
 document.getElementById('btnPause').onclick=function(){ paused=!paused; this.textContent=paused?'재개':'일시정지'; };
 document.querySelectorAll('.spd').forEach(b=>b.onclick=function(){
   speed=+this.dataset.s;
