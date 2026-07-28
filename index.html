@@ -16,6 +16,8 @@
   .sec h3 { font-size:12px; color:#9aa3b5; margin-bottom:6px; letter-spacing:1px; }
   #clock { font-size:20px; font-weight:bold; color:#f2c94c; }
   #dayLabel { font-size:12px; color:#9aa3b5; margin-left:8px; }
+  #modeLabel { font-size:11px; color:#20242e; background:#84a59d; border-radius:4px;
+               padding:2px 7px; margin-left:8px; }
   /* 상태 요약 */
   #stateSummary { display:flex; flex-wrap:wrap; gap:6px 12px; font-size:12px; }
   .stDot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #555; }
@@ -36,7 +38,15 @@
   #approvalBox.show { display:block; animation:pulse 1.4s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,64,122,.5);} 50%{box-shadow:0 0 0 6px rgba(224,64,122,0);} }
   #approvalBox p { font-size:12px; margin-bottom:8px; }
-  #btnApprove { background:#2a9d6f; border-color:#2a9d6f; }
+  #approvalTitle { font-size:12px; margin-bottom:8px; }
+  #approvalChoices { display:flex; flex-direction:column; gap:5px; }
+  .choice { border:1px solid #4a526a; border-radius:6px; padding:6px 8px; cursor:pointer;
+            font-size:11.5px; line-height:1.5; background:#332a3d; }
+  .choice:hover { border-color:#7a6a8a; }
+  .choice.sel { border-color:#f2c94c; background:#3f3547; }
+  .choice b { color:#f2c94c; }
+  .choice span { color:#a89ab5; }
+  #btnApprove, .btnOk { background:#2a9d6f; border-color:#2a9d6f; }
   #btnRevise { background:#c98a2a; border-color:#c98a2a; }
   #btnDiscard { background:#a04040; border-color:#a04040; }
   /* 지시창 */
@@ -59,7 +69,7 @@
   <div id="officeWrap"><canvas id="office" width="1098" height="612"></canvas></div>
   <div id="panel">
     <div class="sec">
-      <span id="clock">--:--</span><span id="dayLabel">출근 전</span>
+      <span id="clock">--:--</span><span id="dayLabel">출근 전</span><span id="modeLabel"></span>
       <div class="btnRow">
         <button id="btnStart">하루 시작</button>
         <button id="btnPause" disabled>일시정지</button>
@@ -71,11 +81,9 @@
     <div class="sec"><h3>직원 상태 32명</h3><div id="stateSummary"></div></div>
     <div class="sec"><h3>하루 시나리오 <span id="stepCount">12단계</span></h3><div id="stepList"></div>
       <div id="approvalBox">
-        <p id="approvalMsg">★ 대표 승인 대기 — 검수 3팀장이 회의실에서 기다립니다.</p>
-        <div class="btnRow">
-          <button id="btnApprove">승인</button><button id="btnRevise">수정 요청</button>
-          <button id="btnHold">보류</button><button id="btnDiscard">폐기</button>
-        </div>
+        <p id="approvalTitle">★ 대표 승인 대기</p>
+        <div id="approvalChoices"></div>
+        <div id="approvalBtns" class="btnRow"></div>
       </div>
     </div>
     <div class="sec" id="cmdSec">
@@ -88,6 +96,7 @@
         <button data-q="이 수치 어디서 나왔어?">수치 출처</button>
         <button data-q="그 한계 근거 대봐">한계 근거</button>
         <button data-q="집중 모드">집중 모드</button>
+        <button data-q="모드 B로">모드 전환</button>
       </div>
       <div id="cmdRow">
         <input id="cmdInput" placeholder='예: "모델링팀 뭐해?" / "왜 막혔어?"'>
@@ -275,7 +284,13 @@ function walkTo(e,tx,ty){
 
 /* ── 시간·속도·대기 ── */
 let speed=1, paused=false, dayStarted=false, dayDone=false;
-let simMin=9*60, curStep=-1, approvalPending=false, approvalSince=0, approvalResolve=null;
+let simMin=9*60, curStep=-1;
+// 승인 게이트 — ⑪ 전용 하드코딩을 걷어내고 문맥을 객체 하나에 담는다.
+// {cfg, resolve, since, pick}. 열려 있으면 non-null.
+let approvalGate=null;
+// 하루 세대 토큰 — 리셋 후에도 이전 날의 코루틴이 살아 움직이는 것을 막는다.
+let dayEpoch=0;
+let decisions=[];  // [{title, action}] — 브리핑 집계 근거
 let dataWaitMsg=null, rejectCount=0, decisionMade=null;
 const pendWaits=[];
 const wait=ms=>new Promise(res=>pendWaits.push({left:ms,res}));
@@ -412,12 +427,15 @@ function draw() {
   cx.textAlign = 'left';
 
   // ⑥ 승인 대기 — 회의실을 맥동시켜 시선을 끈다
-  if (approvalPending) {
+  if (approvalGate) {
     const a = 0.35 + 0.25 * Math.sin(performance.now() / 320);
     cx.save();
     cx.strokeStyle = 'rgba(224,64,122,' + a + ')';
     cx.lineWidth = 4; cx.shadowColor = 'rgba(224,64,122,.7)'; cx.shadowBlur = 14;
-    cx.strokeRect(20 * TILE, 12 * TILE, 21 * TILE, 10 * TILE);
+    const hl = approvalGate.cfg.highlight === 'ceo'
+      ? [46 * TILE, 12 * TILE, 15 * TILE, 10 * TILE]
+      : [20 * TILE, 12 * TILE, 21 * TILE, 10 * TILE];
+    cx.strokeRect(hl[0], hl[1], hl[2], hl[3]);
     cx.restore();
   }
 
@@ -597,6 +615,22 @@ const CORE_STEPS = [
   { k:'repro',   t:'재현성 고정 → 비서실 브리핑' },
 ];
 const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯';
+/* 모드별 앞단 — 12단계 '앞에' 붙고 ②요구정의 입구에서 합류한다.
+   기존 대본은 한 줄도 대체하지 않는다. */
+const PROLOGUE_STEPS = {
+  A: [ { k:'pScan',   t:'보유 산출물 스캔 — 답할 수 있는 것 추리기' },
+       { k:'pIdeate', t:'기획 3안 발굴' },
+       { k:'pFilter', t:'자체 타당성 필터(요구정의 반려 기준)' },
+       { k:'pAdopt',  t:'★ 대표 채택 ★' } ],
+  B: [ { k:'pScan',   t:'미해결 대장 로드 — 미측정·이관 항목' },
+       { k:'pIdeate', t:'개선 과제 3안 발굴' },
+       { k:'pFilter', t:'예상 델타 필터' },
+       { k:'pAdopt',  t:'★ 대표 채택 ★' } ],
+};
+const MODE_LABEL = { A:'모드 A · 신규 기획', B:'모드 B · 기존 디벨롭', F:'고정 대본' };
+let mode = 'A';            // 하루 단위로 고정. 지시창으로 '내일' 예약만 가능
+let nextMode = null;       // 다음 날 적용할 모드
+let ctx = null;            // 채택된 과제 {label, note, question, tags}
 let steps = CORE_STEPS.slice();
 /** 현재 단계를 키로 지정한다. 단계 수가 모드마다 달라도 본문은 그대로다. */
 function step(k) { curStep = steps.findIndex(s => s.k === k); }
@@ -605,6 +639,9 @@ function refreshUI(){
   const h=Math.floor(simMin/60)%24, m=Math.floor(simMin%60);
   document.getElementById('clock').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
   document.getElementById('dayLabel').textContent=dayDone?'퇴근':dayStarted?'근무 중':'출근 전';
+  const ml=document.getElementById('modeLabel');
+  ml.textContent=MODE_LABEL[mode];
+  ml.style.background = mode==='A' ? '#84a59d' : mode==='B' ? '#b79ce8' : '#6c7385';
   const cnt={}; for(const k in STATES) cnt[k]=0;
   for(const e of emps) cnt[e.state]++;
   document.getElementById('stateSummary').innerHTML=Object.keys(STATES).map(k=>
@@ -613,9 +650,12 @@ function refreshUI(){
     `<div class="step ${i<curStep?'done':i===curStep?'now':''}">${i<curStep?'✔':i===curStep?'▶':'·'} ${stepLabel(i)}</div>`).join('');
   const badge=document.getElementById('stepCount'); if(badge) badge.textContent=steps.length+'단계';
   const now=document.querySelector('#stepList .step.now'); if(now) now.scrollIntoView({block:'nearest'});
-  if(approvalPending){
-    const sec=Math.floor((performance.now()-approvalSince)/1000);
-    document.getElementById('approvalMsg').textContent=`★ 대표 승인 대기 — 검수 3팀장이 회의실에서 ${sec}초째 기다립니다.`;
+  // 패널 본문은 게이트가 열릴 때 1회만 그린다 — 매 프레임 innerHTML을 갈아끼우면
+  // 카드 선택 상태와 클릭이 유지되지 않는다. 여기서는 경과 초만 만진다.
+  if(approvalGate){
+    const sec=Math.floor((performance.now()-approvalGate.since)/1000);
+    const el=document.getElementById('approvalTimer');
+    if(el) el.textContent=`${sec}초째 대기 중`;
   }
 }
 function addMsg(who,text,me,pre){
@@ -639,16 +679,156 @@ async function handoff(fromName,toDept,text){
   await walkTo(e,d.x,d.y); await say(e,text,2200); await walkTo(e,e.chair.x,e.chair.y);
 }
 
+/* ── 기획 후보 ──
+   실제 리포트(daily_20260728.md)가 스스로 '미측정·이관'이라 적어둔 항목과,
+   반복 평가가 드러낸 취약 결함모드만 근거로 삼는다. 없는 과제를 지어내지 않는다. */
+const PLAN_POOL = {
+  A: [
+    { label:'IDV 3 대체 감시 수단 설계',
+      note:'근거: 반복 10회 중 8회 완전 미탐 · 최대 이동량 1.0σ — 모델로는 못 잡는다',
+      question:'IDV 3을 재구성오차 외 어떤 신호로 감시할 수 있는가',
+      tags:'xmeas_13 · xmeas_07' },
+    { label:'오탐 비용 기준 임계값 재보정',
+      note:'근거: F1과 ROC-AUC가 다른 모델을 가리킴 — 임계값 보정 차이. 비용비는 대표가 채워야 함',
+      question:'오탐:미탐 비용비가 주어질 때 최적 임계값은 얼마인가',
+      tags:'전 태그 · 임계값' },
+    { label:'결함 IDV 확장 수집 계획',
+      note:'근거: 확장 평가 게이트 1,940/2,000 미달 · 커버리지 회차 편차 큼',
+      question:'어느 IDV를 몇 행 더 모아야 평가가 안정되는가',
+      tags:'수집 계획' },
+  ],
+  B: [
+    { label:'평활 look-ahead 제거',
+      note:'예상 델타: 온라인 성능 미측정 → 측정 가능. center=True가 뒤 6분을 참조 중',
+      question:'후행 평활로 바꾸면 홀드아웃 F1이 얼마나 떨어지는가',
+      tags:'scoring.py · window=5' },
+    { label:'홀드아웃 유병률 안정화',
+      note:'예상 델타: F1 편차 ±0.127 축소. 유병률 0.130~0.452 변동이 F1과 r 0.50',
+      question:'회차별 유병률 변동을 줄이면 편차가 얼마나 주는가',
+      tags:'분할 설계' },
+    { label:'IDV 18 대체 감시 매핑',
+      note:'예상 델타: 미매핑 1종 해소. 8회 중 3회 완전 미탐 · 최대 이동량 0.7σ',
+      question:'IDV 18을 관리도·인터록 중 무엇으로 덮는가',
+      tags:'xmeas_19 · xmv_09' },
+  ],
+};
+
+/* ── 승인 게이트 (범용) ──
+   사규 ⑪만이 아니라 기획 채택에서도 쓴다. 참석자를 회의실/대표실에 앉히고,
+   패널을 1회 그린 뒤, 대표가 누를 때까지 await 한다.
+   반환: {action, pick} — pick 은 선택 카드가 있을 때만 채워진다. */
+async function requestApproval(cfg) {
+  const seats = cfg.seats || [];
+  for (const n of seats) { E(n).inMeeting = true; E(n).state = '승인 대기'; }
+  if (seats.length)
+    await Promise.all(seats.map((n, i) => walkTo(E(n), MEET_SEATS[i].x, MEET_SEATS[i].y)));
+  for (const n of seats) E(n).bubble = { text: cfg.bubble || '확인해주세요', until: Infinity };
+
+  // 패널 1회 렌더
+  document.getElementById('approvalTitle').innerHTML =
+    `${cfg.title} <span id="approvalTimer" style="color:#c9a0bb"></span>`;
+  const cbox = document.getElementById('approvalChoices');
+  cbox.innerHTML = (cfg.choices || []).map((c, i) =>
+    `<div class="choice" data-i="${i}"><b>${c.label}</b><br><span>${c.note}</span></div>`).join('');
+  const bbox = document.getElementById('approvalBtns');
+  bbox.innerHTML = cfg.options.map(o =>
+    `<button data-act="${o.id}" class="${o.cls || ''}">${o.label}</button>`).join('');
+  document.getElementById('approvalBox').classList.add('show');
+  syncGateButtons();
+
+  const res = await new Promise(resolve => {
+    approvalGate = { cfg, resolve, since: performance.now(), pick: null };
+  });
+
+  approvalGate = null;
+  document.getElementById('approvalBox').classList.remove('show');
+  cbox.innerHTML = ''; bbox.innerHTML = '';
+  for (const n of seats) E(n).bubble = null;
+  decisions.push({ title: cfg.title, action: res.action });
+  addMsg('대표', `[${res.action}]` + (res.pick ? ` ${res.pick.label}` : ''), true);
+  return res;
+}
+
+/** 카드가 있는 게이트는 하나를 고르기 전까지 확정 버튼을 잠근다. */
+function syncGateButtons() {
+  if (!approvalGate) return;
+  const need = (approvalGate.cfg.choices || []).length > 0;
+  for (const b of document.querySelectorAll('#approvalBtns button')) {
+    const opt = approvalGate.cfg.options.find(o => o.id === b.dataset.act);
+    b.disabled = need && opt && opt.needsPick && approvalGate.pick === null;
+  }
+}
+
+/* ── 프롤로그 — 모드 A/B 공통 골격 ──
+   반환: 채택된 과제 ctx, 또는 null(전부 반려 → 오늘 착수 없음). */
+async function runPrologue(my) {
+  const isA = mode === 'A';
+  const teams = isA ? ['한지훈','정해린','윤도경'] : ['최시온','강태섭','문상우'];
+
+  step('pScan');
+  setDept(10,'진행 중'); await recallDept(10);
+  await say(E('문상우'), isA ? '지금 회사가 가진 산출물 펼칩니다.' : '미해결 대장 꺼냈습니다 — 미측정·이관 항목요.');
+  setDept(10,'완료');
+  if (my !== dayEpoch) return null;
+
+  step('pIdeate');
+  addMsg('시스템', isA ? '기획 회의 — 팀장 3명이 각자 과제를 냅니다.'
+                       : '회고 회의 — 검수 3팀장이 개선 과제를 냅니다.');
+  const pool = PLAN_POOL[isA ? 'A' : 'B'];
+  await meeting(teams, teams.map((n, i) => [n, pool[i].label]));
+  if (my !== dayEpoch) return null;
+
+  step('pFilter');
+  await say(E(isA ? '한지훈' : '최시온'),
+            isA ? '셋 다 결정 사항이 있습니다. 통과.' : '셋 다 예상 델타를 씁니다. 통과.');
+  if (my !== dayEpoch) return null;
+
+  step('pAdopt');
+  addMsg('시스템','대표 채택이 필요합니다 — 3안 중 1개를 고르거나 전부 반려하세요.');
+  const r = await requestApproval({
+    title: (isA ? '★ 기획 채택 대기' : '★ 개선 과제 채택 대기') + ' —',
+    seats: teams, highlight:'meet', bubble:'골라주세요',
+    choices: pool,
+    options: [{ id:'채택', label:'채택', cls:'btnOk', needsPick:true },
+              { id:'전부 반려', label:'전부 반려' }],
+  });
+  if (my !== dayEpoch) return null;
+  for (const n of teams) { E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n), E(n).chair.x, E(n).chair.y); }
+
+  if (r.action !== '채택' || !r.pick) {
+    addMsg('유하람','전부 반려되어 오늘은 착수하지 않습니다. 내일 다시 기획하겠습니다.');
+    return null;
+  }
+  addMsg('유하람', `채택: ${r.pick.label} — 질문 "${r.pick.question}"`);
+  return r.pick;
+}
+
 /* ── 하루 시나리오 (사규 §9) ── */
 async function runDay(){
   if(dayStarted) return;
   dayStarted=true;
+  const my=dayEpoch;  // 리셋되면 이 값이 어긋나 이후 단계가 조용히 종료된다
   document.getElementById('btnStart').disabled=true;
   document.getElementById('btnPause').disabled=false;
-  addMsg('시스템','09:00 — 전원 출근합니다.');
+  steps = (mode==='F' ? [] : PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
+  addMsg('시스템',`09:00 — 전원 출근합니다. (${MODE_LABEL[mode]})`);
   // 출근: 순차 입장
   for(const e of emps){ e.onsite=true; walkTo(e,e.chair.x,e.chair.y); await wait(150); }
   while(emps.some(e=>e.goal)) await wait(200);
+  if(my!==dayEpoch) return;
+
+  // 프롤로그 — 오늘 무엇을 할지부터 정한다. 전부 반려면 착수 없이 종료.
+  if(mode!=='F'){
+    ctx = await runPrologue(my);
+    if(my!==dayEpoch) return;
+    if(!ctx){
+      curStep=steps.length; dayDone=true;
+      addMsg('유하람','① 오늘 완료: 기획 반려 · ② 착수 없음 · ⑤ 내일 재기획');
+      addMsg('시스템','하루 일과 종료. 15초 후 다음 날이 자동 시작됩니다.');
+      setTimeout(resetDay,15000);
+      return;
+    }
+  }
 
   step('check'); setDept(10,'진행 중'); await recallDept(10);
   await say(E('탁현서'),'--check 돌렸습니다 — 낡은 리포트 없어요.');
@@ -658,10 +838,18 @@ async function runDay(){
   step('define'); setDept(0,'진행 중'); await recallDept(0);
   await say(E('한지훈'),'이 분석으로 뭘 결정하실 건가요?');
   await say(E('조은결'),'질문이 2개인데요. 쪼갤까요?');
-  await say(E('한지훈'),"쪼개죠. 오늘은 '미탐 IDV 대체 감시' 하나로.");
+  await say(E('한지훈'), ctx ? `쪼개죠. 오늘은 '${ctx.label}' 하나로.`
+                             : "쪼개죠. 오늘은 '미탐 IDV 대체 감시' 하나로.");
   setDept(0,'완료'); await handoff('조은결',1,'요구정의서 전달드려요.');
 
-  step('collect'); setDept(1,'데이터 대기'); await recallDept(1);
+  step('collect');
+  if(mode==='B'){  // 기존 프로젝트 개선 — 수집은 다시 돌지 않고 스냅샷을 재사용한다
+    setDept(1,'진행 중');
+    await say(E('서민재'),'기존 스냅샷 재사용합니다. 새로 안 모읍니다.',2400);
+    setDept(1,'완료'); setDept(2,'완료');
+    step('quality'); await say(E('노아름'),'품질 검사 결과도 재사용합니다.',2200);
+  } else {
+  setDept(1,'데이터 대기'); await recallDept(1);
   dataWaitMsg='GitHub 원격 데이터 스냅샷이 아직 없어 수집팀이 데이터 대기 중';
   await say(E('신유빈'),'GitHub 원격 데이터 당겨오는 중… (데이터 대기)',3200);
   dataWaitMsg=null; setDept(1,'진행 중');
@@ -674,6 +862,7 @@ async function runDay(){
   await say(E('남시우'),'타임스탬프 역전은 없네요.');
   await say(E('노아름'),'포화 구간 마스킹하고 넘깁니다.');
   setDept(2,'완료'); await handoff('권나린',3,'품질 리포트 전달해요.');
+  }
 
   step('eda'); setDept(3,'진행 중'); await recallDept(3);
   await say(E('백서윤'),'그림만 있고 수치가 없어요 — 검정 붙일게요.');
@@ -703,7 +892,8 @@ async function runDay(){
   setDept(6,'완료'); await handoff('진세호',7,'검수 통과분 전달합니다.');
 
   step('interp'); setDept(7,'진행 중'); await recallDept(7);
-  await say(E('천이든'),'상위 기여 변수는 xmeas_21인데, 원인은 아닙니다.');
+  await say(E('천이든'), ctx ? `상위 기여 변수는 ${ctx.tags.split(' · ')[0]}인데, 원인은 아닙니다.`
+                             : '상위 기여 변수는 xmeas_21인데, 원인은 아닙니다.');
   await say(E('편도하'),"공정 조치로 바꾸면 '냉각수 라인 점검'이죠.");
   await say(E('임세아'),'결론 수치부터 씁니다.');
   setDept(7,'완료');
@@ -720,31 +910,20 @@ async function runDay(){
   step('approve');
   addMsg('시스템','검수 3팀장이 회의실로 이동합니다. 대표 승인이 필요합니다.');
   const gate=['최시온','강태섭','오다현'];
-  for(const n of gate){ E(n).inMeeting=true; E(n).state='승인 대기'; }
-  await Promise.all(gate.map((n,i)=>walkTo(E(n),MEET_SEATS[i].x,MEET_SEATS[i].y)));
-  for(const n of gate) E(n).bubble={text:'확인해주세요',until:Infinity};
-  approvalPending=true; approvalSince=performance.now();
-  document.getElementById('approvalBox').classList.add('show');
-  const choice=await new Promise(res=>approvalResolve=res);
-  approvalPending=false; decisionMade=choice;
-  document.getElementById('approvalBox').classList.remove('show');
-  for(const n of gate) E(n).bubble=null;
-  addMsg('대표',`[${choice}]`,true);
-
-  if(choice==='수정 요청'){
+  // '수정 요청'이면 해석팀이 재작업 후 다시 올라온다 — 승인/보류/폐기가 나올 때까지 반복
+  while(true){
+    const r=await requestApproval({
+      title:'★ 대표 승인 대기 — 검수 3팀장이 회의실에서', seats:gate, highlight:'meet',
+      options:[{id:'승인',label:'승인',cls:'btnOk'},{id:'수정 요청',label:'수정 요청'},
+               {id:'보류',label:'보류'},{id:'폐기',label:'폐기'}],
+    });
+    if(my!==dayEpoch) return;
+    decisionMade=r.action;
+    if(r.action!=='수정 요청') break;
     for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
     setDept(7,'진행 중');
-    addMsg('임세아','수정 반영해서 다시 올리겠습니다.');
     await say(E('임세아'),'수정 반영 중입니다.',3600);
     setDept(7,'완료');
-    for(const n of gate){ E(n).inMeeting=true; E(n).state='승인 대기'; }
-    await Promise.all(gate.map((n,i)=>walkTo(E(n),MEET_SEATS[i].x,MEET_SEATS[i].y)));
-    approvalPending=true; approvalSince=performance.now();
-    document.getElementById('approvalBox').classList.add('show');
-    decisionMade=await new Promise(res=>approvalResolve=res);
-    approvalPending=false;
-    document.getElementById('approvalBox').classList.remove('show');
-    addMsg('대표',`[${decisionMade}]`,true);
   }
   for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
 
@@ -759,11 +938,11 @@ async function runDay(){
   await walkTo(sec,BRIEF_SPOT.x,BRIEF_SPOT.y);
   await say(sec,'오늘 결정하실 건 1개였습니다.',3000);
   addMsg('유하람',
-`① 오늘 완료: ${steps.length}단계 중 ${decisionMade==='승인'?steps.length:steps.length-1}단계
+`① 오늘 완료: ${steps.length}단계 중 ${decisionMade==='승인'?steps.length:steps.length-1}단계 (${MODE_LABEL[mode]})
 ② 진행 중: 없음
-③ 대표 승인 대기: 0건 (처리됨 — ${decisionMade})
+③ 대표 결재: ${decisions.length}건 — ${decisions.map(d=>d.action).join(' / ')}
 ④ 막힌 것: 반려 ${rejectCount}건(피처 누수 1·불확실성 1) → 재작업 완료
-⑤ 오늘 대표가 결정할 것: 승인 1건 (완료)`,false,true);
+⑤ 오늘 대표가 결정할 것: ${decisions.length}건 (완료)`,false,true);
   await walkTo(sec,sec.chair.x,sec.chair.y); sec.inMeeting=false;
   setDept(11,'완료');
   curStep=steps.length; dayDone=true;
@@ -773,9 +952,18 @@ async function runDay(){
 
 /* ── 다음 날 리셋 — reload는 미리보기/아티팩트 컨텍스트에서 막힐 수 있어 상태만 초기화한다 ── */
 function resetDay(){
+  dayEpoch++;                                   // 이전 날 코루틴 무효화
+  for(const w of pendWaits) w.res();            // 버리지 않고 해제 — 버리면 영원히 멈춘다
   pendWaits.length=0;
+  if(approvalGate){                             // 게이트가 열린 채 리셋되면 코루틴이 영구 정지
+    const g=approvalGate; approvalGate=null;
+    document.getElementById('approvalBox').classList.remove('show');
+    g.resolve({action:'중단',pick:null});
+  }
   dayStarted=false; dayDone=false; curStep=-1; simMin=9*60;
-  rejectCount=0; decisionMade=null; approvalPending=false; dataWaitMsg=null;
+  rejectCount=0; decisionMade=null; dataWaitMsg=null; decisions=[]; ctx=null;
+  if(nextMode){ mode=nextMode; nextMode=null; }   // 예약된 모드는 다음 날부터 적용
+  steps=(mode==='F'?[]:PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
   for(const e of emps) Object.assign(e,{x:ENTRY.x,y:ENTRY.y,path:[],seg:0,state:'대기',onsite:false,
     sitting:false,inMeeting:false,wandering:false,recall:false,bubble:null,goal:null,resolver:null,stuck:0});
   const b=document.getElementById('btnStart'); b.disabled=false; b.textContent='하루 시작';
@@ -786,8 +974,8 @@ function resetDay(){
 
 /* ── 대표 지시창 (사규 §10) ── */
 function bottleneckAnswer(){
-  if(approvalPending){
-    const sec=Math.floor((performance.now()-approvalSince)/1000);
+  if(approvalGate){
+    const sec=Math.floor((performance.now()-approvalGate.since)/1000);
     return `원인은 하나예요 — 대표님 결재 대기입니다. 회의실에서 3명이 ${sec}초째 기다리고 있어요. 승인만 눌러주시면 바로 다음 단계로 넘어갑니다.`;
   }
   if(dataWaitMsg) return `${dataWaitMsg}입니다. 스냅샷이 도착하면 자동으로 풀립니다.`;
@@ -824,13 +1012,23 @@ function handleCommand(raw){
     addMsg('임세아',`결함모드별 재현율 원표입니다 — 완전 미탐: IDV 3(0.00)·IDV 18(0.00) / 취약: IDV 2(0.79)·8(0.71)·12(0.56) / 완전 탐지: IDV 4·6·7·14(1.00). 출처 comparison.json.`);
     return; }
   if(t.includes('검수소집')||t.includes('회의소집')){
-    if(approvalPending){ addMsg('유하람','지금은 승인 회의가 진행 중입니다. 결재부터 부탁드려요.'); return; }
+    if(approvalGate){ addMsg('유하람','지금은 결재가 진행 중입니다. 그것부터 부탁드려요.'); return; }
     if(!dayStarted){ addMsg('유하람','출근 전이라 소집이 어렵습니다.'); return; }
     if(sideBusy){ addMsg('유하람','이미 회의 중입니다.'); return; }
     sideBusy=true; inspectionMeeting().finally(()=>sideBusy=false); return; }
   if(t.includes('집중')){
     let n=0; for(const e of emps) if(e.wandering){ e.recall=true; n++; }
     addMsg('유하람',n?`라운지의 ${n}명을 자리로 복귀시켰습니다.`:'전원 자리에 있습니다.'); return; }
+  if(t.includes('모드')||t.includes('기획')||t.includes('디벨롭')){
+    const want = t.includes('A')||t.includes('신규') ? 'A'
+               : t.includes('B')||t.includes('디벨롭')||t.includes('개선') ? 'B'
+               : t.includes('고정')||t.includes('대본') ? 'F' : null;
+    if(!want){ addMsg('유하람',`현재 ${MODE_LABEL[mode]}입니다. "모드 B로" 처럼 말씀해주세요.`); return; }
+    if(!dayStarted||dayDone){ mode=want; nextMode=null;
+      steps=(mode==='F'?[]:PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
+      addMsg('유하람',`${MODE_LABEL[want]}로 바꿨습니다.`); return; }
+    nextMode=want;
+    addMsg('유하람',`하루 중간 전환은 안 합니다. 내일부터 ${MODE_LABEL[want]}로 예약했습니다.`); return; }
   for(let d=0;d<12;d++){
     if(t.includes(DEPTS[d].name.replace(/\s/g,''))||t.includes(DEPTS[d].short)){
       const lead=deptEmps(d).find(e=>e.lead), mem=deptEmps(d);
@@ -856,11 +1054,19 @@ document.getElementById('btnPause').onclick=function(){ paused=!paused; this.tex
 document.querySelectorAll('.spd').forEach(b=>b.onclick=function(){
   speed=+this.dataset.s;
   document.querySelectorAll('.spd').forEach(x=>x.classList.toggle('speedOn',x===this)); });
-for(const id of ['btnApprove','btnRevise','btnHold','btnDiscard']){
-  document.getElementById(id).onclick=()=>{ if(approvalResolve){
-    const map={btnApprove:'승인',btnRevise:'수정 요청',btnHold:'보류',btnDiscard:'폐기'};
-    const r=approvalResolve; approvalResolve=null; r(map[id]); } };
-}
+// 게이트마다 버튼·카드가 달라지므로 ID 바인딩 대신 위임으로 받는다
+document.getElementById('approvalBtns').addEventListener('click',ev=>{
+  const b=ev.target.closest('button'); if(!b||!approvalGate||b.disabled) return;
+  const g=approvalGate; approvalGate=null;
+  g.resolve({action:b.dataset.act, pick:g.pick});
+});
+document.getElementById('approvalChoices').addEventListener('click',ev=>{
+  const c=ev.target.closest('.choice'); if(!c||!approvalGate) return;
+  for(const el of document.querySelectorAll('#approvalChoices .choice')) el.classList.remove('sel');
+  c.classList.add('sel');
+  approvalGate.pick=approvalGate.cfg.choices[+c.dataset.i];
+  syncGateButtons();
+});
 document.querySelectorAll('#quickBtns button').forEach(b=>b.onclick=()=>handleCommand(b.dataset.q));
 document.getElementById('btnSend').onclick=()=>{ const i=document.getElementById('cmdInput'); handleCommand(i.value); i.value=''; };
 document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ handleCommand(e.target.value); e.target.value=''; } });
