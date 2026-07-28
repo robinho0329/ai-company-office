@@ -20,6 +20,9 @@
                padding:2px 7px; margin-left:8px; }
   /* 상태 요약 */
   #stateSummary { display:flex; flex-wrap:wrap; gap:6px 12px; font-size:12px; }
+  #planSrc { margin-top:7px; font-size:11px; padding:3px 7px; border-radius:4px; }
+  .srcReal { background:#1f3d33; color:#3ecfae; border:1px solid #2a6b56; }
+  .srcDemo { background:#3a3626; color:#e0c14a; border:1px solid #6b5e2a; }
   .stDot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #555; }
   /* 시나리오 단계 */
   #stepList { font-size:11.5px; line-height:1.75; max-height:170px; overflow-y:auto; }
@@ -78,7 +81,8 @@
         <button class="spd" data-s="4">4x</button>
       </div>
     </div>
-    <div class="sec"><h3>직원 상태 34명</h3><div id="stateSummary"></div></div>
+    <div class="sec"><h3>직원 상태 34명</h3><div id="stateSummary"></div>
+      <div id="planSrc" class="srcDemo">후보 출처: 확인 중…</div></div>
     <div class="sec"><h3>하루 시나리오 <span id="stepCount">12단계</span></h3><div id="stepList"></div>
       <div id="approvalBox">
         <p id="approvalTitle">★ 대표 승인 대기</p>
@@ -97,6 +101,7 @@
         <button data-q="그 한계 근거 대봐">한계 근거</button>
         <button data-q="집중 모드">집중 모드</button>
         <button data-q="모드 B로">모드 전환</button>
+        <button data-q="후보 출처">후보 출처</button>
       </div>
       <div id="cmdRow">
         <input id="cmdInput" placeholder='예: "모델링팀 뭐해?" / "왜 막혔어?"'>
@@ -694,6 +699,34 @@ async function handoff(fromName,toDept,text){
 /* ── 기획 후보 ──
    실제 리포트(daily_20260728.md)가 스스로 '미측정·이관'이라 적어둔 항목과,
    반복 평가가 드러낸 취약 결함모드만 근거로 삼는다. 없는 과제를 지어내지 않는다. */
+let planSource = { kind:'예시', detail:'candidates.json 미로드 — 내장 예시' };
+
+/** 실제 산출물에서 뽑은 후보를 읽어온다.
+ *  src/report/discover.py 가 리포트·repeat_eval 을 파싱해 만든 파일이다.
+ *  못 읽으면 내장 예시로 폴백하되, 화면에 '예시'라고 표시한다. */
+async function loadCandidates() {
+  try {
+    const res = await fetch('candidates.json', { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    if (!d.A || !d.B) throw new Error('형식 불일치');
+    if (!d.A.length && !d.B.length) throw new Error('후보 0개');
+    PLAN_POOL.A = d.A.length ? d.A : PLAN_POOL.A;
+    PLAN_POOL.B = d.B.length ? d.B : PLAN_POOL.B;
+    planSource = { kind:'실측', detail:`${d.source_report} · ${d.generated.slice(0,16)}`,
+                   blanks: d.blanks_for_owner || [] };
+    addMsg('도서진', `이월 대장 로드 완료 — 근거: ${d.source_report}`);
+  } catch (e) {
+    planSource = { kind:'예시', detail:`candidates.json 로드 실패(${e.message}) — 내장 예시로 진행` };
+  }
+  const el = document.getElementById('planSrc');
+  if (el) {
+    el.textContent = planSource.kind === '실측' ? `후보 출처: 실측 · ${planSource.detail}`
+                                                : `후보 출처: ${planSource.detail}`;
+    el.className = planSource.kind === '실측' ? 'srcReal' : 'srcDemo';
+  }
+}
+
 const PLAN_POOL = {
   A: [
     { label:'IDV 3 대체 감시 수단 설계',
@@ -741,7 +774,9 @@ async function requestApproval(cfg) {
     `${cfg.title} <span id="approvalTimer" style="color:#c9a0bb"></span>`;
   const cbox = document.getElementById('approvalChoices');
   cbox.innerHTML = (cfg.choices || []).map((c, i) =>
-    `<div class="choice" data-i="${i}"><b>${c.label}</b><br><span>${c.note}</span></div>`).join('');
+    `<div class="choice" data-i="${i}"><b>${c.label}</b><br><span>${c.note}</span>` +
+    (c.source ? `<br><span style="color:#7f93a8">출처 ${c.source}</span>` : '') +
+    `</div>`).join('');
   const bbox = document.getElementById('approvalBtns');
   bbox.innerHTML = cfg.options.map(o =>
     `<button data-act="${o.id}" class="${o.cls || ''}">${o.label}</button>`).join('');
@@ -812,7 +847,8 @@ async function runPrologue(my) {
   step('pAdopt');
   addMsg('시스템','대표 채택이 필요합니다 — 3안 중 1개를 고르거나 전부 반려하세요.');
   const r = await requestApproval({
-    title: (isA ? '★ 기획 채택 대기' : '★ 개선 과제 채택 대기') + ' —',
+    title: (isA ? '★ 기획 채택 대기' : '★ 개선 과제 채택 대기')
+           + ` [${planSource.kind}] —`,
     seats: teams, highlight:'meet', bubble:'골라주세요',
     choices: pool,
     options: [{ id:'채택', label:'채택', cls:'btnOk', needsPick:true },
@@ -837,6 +873,7 @@ async function runDay(){
   document.getElementById('btnStart').disabled=true;
   document.getElementById('btnPause').disabled=false;
   steps = (mode==='F' ? [] : PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
+  await loadCandidates();          // 실제 산출물에서 오늘 후보를 받아온다
   addMsg('시스템',`09:00 — 전원 출근합니다. (${MODE_LABEL[mode]})`);
   // 출근: 순차 입장
   for(const e of emps){ e.onsite=true; walkTo(e,e.chair.x,e.chair.y); await wait(150); }
@@ -1031,6 +1068,11 @@ function handleCommand(raw){
     addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/${steps.length} — ${cur}. 다음은 ${nxt}입니다.`);
     return; }
   if(t.includes('왜')&&(t.includes('막')||t.includes('늦'))){ addMsg('유하람',bottleneckAnswer()); return; }
+  if(t.includes('후보')||t.includes('근거출처')||t.includes('대장')){
+    addMsg('예지완', planSource.kind==='실측'
+      ? `실측입니다. ${planSource.detail} 에서 뽑았습니다. 지어낸 후보는 없습니다.`
+      : `지금은 예시입니다 — ${planSource.detail}. 실측을 보시려면 discover.py 를 돌리고 웹서버로 여세요.`);
+    return; }
   if(t.includes('수치')||t.includes('어디서')){
     addMsg('문상우',`data/models/comparison.json (2026-07-01 17:14, sha256 87522ad05634)에서 나왔습니다. 재현: python -m src.report.daily_report --check`);
     return; }

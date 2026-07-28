@@ -41,9 +41,35 @@
 
 부서명이나 직원 이름(예: "모델링팀 뭐해?", "최시온")으로도 물어볼 수 있습니다.
 
+## 후보는 어디서 오나
+
+기획 후보 3개는 **실제 산출물에서 뽑힙니다.** 화면에 출처 배지가 뜹니다.
+
+| 배지 | 뜻 |
+|---|---|
+| 🟢 실측 | `candidates.json` 을 읽었다 — 후보에 인용 문장과 파일 경로가 붙는다 |
+| 🟡 예시 | 파일을 못 읽어 내장 예시로 진행 중 |
+
+`candidates.json` 은 분석 저장소의 `src/report/discover.py` 가 만듭니다.
+리포트가 스스로 '미측정·미실행·이관'이라 적은 문장과, 반복 평가가 드러낸
+완전 미탐 결함모드만 근거로 삼습니다 — **질문을 발명하지 않습니다.**
+
+```bash
+python -m src.report.discover        # 분석 저장소에서 실행
+cp data/discovery/candidates.json ../ai-company-office/
+```
+
 ## 실행
 
-의존성이 없습니다. `index.html`을 브라우저로 열면 됩니다.
+의존성이 없습니다. 다만 `candidates.json` 을 읽으려면 `fetch` 가 필요하고,
+`file://` 로 직접 열면 브라우저가 이를 막아 예시 모드로 떨어집니다.
+
+```bash
+python -m http.server 8770
+```
+
+그다음 http://localhost:8770 을 엽니다. 파일을 그냥 열어도 동작하지만
+후보는 내장 예시가 됩니다.
 
 ```bash
 git clone https://github.com/robinho0329/ai-company-office.git && cd ai-company-office

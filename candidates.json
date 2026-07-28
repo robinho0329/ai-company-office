@@ -1,0 +1,57 @@
+{
+  "generated": "2026-07-28T20:19:40+09:00",
+  "source_report": "reports/daily_20260728.md",
+  "max_candidates": 3,
+  "note": "산출물에서 추출한 후보다. 질문을 발명하지 않으며, 근거 문장과 파일 경로가 없는 후보는 만들지 않는다. 비용비·결정권자 등 사람이 정할 값은 비워 둔다.",
+  "blanks_for_owner": [
+    "오탐 1건 : 미탐 1건 비용비",
+    "이 분석으로 무엇을 결정하는가 + 결정권자",
+    "대상 태그의 조작 권한자"
+  ],
+  "A": [
+    {
+      "label": "IDV 3 대체 감시 수단 설계",
+      "note": "근거: 10회 평가 중 10회 완전 미탐(평균 0.00) · 최대 이동량 1.0σ",
+      "question": "IDV 3을 재구성오차 외 어떤 신호로 감시할 수 있는가",
+      "tags": "xmeas_13 · xmeas_07",
+      "source": "data/models/repeat_eval.json"
+    },
+    {
+      "label": "IDV 18 대체 감시 수단 설계",
+      "note": "근거: 8회 평가 중 6회 완전 미탐(평균 0.03) · 최대 이동량 0.7σ",
+      "question": "IDV 18을 재구성오차 외 어떤 신호로 감시할 수 있는가",
+      "tags": "xmeas_19 · xmv_09",
+      "source": "data/models/repeat_eval.json"
+    },
+    {
+      "label": "IDV 12 대체 감시 수단 설계",
+      "note": "근거: 평균 재현율 0.68(평균 0.68) · 최대 이동량 3.2σ",
+      "question": "IDV 12을 재구성오차 외 어떤 신호로 감시할 수 있는가",
+      "tags": "xmeas_16 · xmeas_07",
+      "source": "data/models/repeat_eval.json"
+    }
+  ],
+  "B": [
+    {
+      "label": "임계값 재보정은 다음 사이클 과제로 해소",
+      "note": "근거: \"→ 기본 모델 Transformer-AE 유지. 임계값 무관 순위 품질(ROC-AUC)에서 상위 그룹에 속하고(동급 모델과는 구별 불가, 하위 모델 대비는 보정 …\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_20260728.md:58"
+    },
+    {
+      "label": "온라인 운영 시 동일 성능 해소",
+      "note": "근거: \"점수 평활 rolling median(window=5, center=True) — 각 시점이 뒤 2스텝(6분)을 참조. 온라인 운영 시 동일 성능은 미측정.…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_20260728.md:59"
+    },
+    {
+      "label": "설비 귀속 해소",
+      "note": "근거: \"**감시 대상 태그 · 출처 `data/eda/fault_signature.json`** — 정상 대비 표준화 평균 이동량. 설비 귀속은 미측정(TEP 문헌 대조…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_20260728.md:67"
+    }
+  ]
+}
