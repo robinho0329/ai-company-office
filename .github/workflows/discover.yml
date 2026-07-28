@@ -1,0 +1,84 @@
+name: Discover Candidates
+
+# 매일 08:30 KST(23:30 UTC) — 오피스가 하루를 시작하기 전에 후보를 갱신해 둔다.
+# 보유 저장소를 전부 얕게 clone 해서 스캔하고, 결과가 달라졌을 때만 커밋한다.
+on:
+  schedule:
+    - cron: "30 23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout office
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 발굴 스크립트는 분석 저장소가 소유한다(사규 §3-0). 거기서 가져와 쓴다.
+      - name: Fetch discover.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p tools
+          gh api repos/${{ github.repository_owner }}/mfg-anomaly-workflow/contents/src/report/discover.py \
+            --jq '.content' | base64 -d > tools/discover.py
+          test -s tools/discover.py
+
+      # 스캔 대상 — 소유한 저장소 전부. 얕은 clone 이라 빠르다.
+      - name: Clone all repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p scan
+          gh repo list ${{ github.repository_owner }} --limit 100 --json name,url \
+            --jq '.[] | .url' | while read -r url; do
+              name=$(basename "$url")
+              git clone --depth 50 --quiet "$url" "scan/$name" 2>/dev/null \
+                && echo "  clone: $name" || echo "  skip:  $name"
+            done
+          ls scan
+
+      # discover.py 는 config.settings 를 임포트한다(경로 상수). CI 에는 없으므로
+      # 최소 스텁을 만들어 준다 — 스캔 자체는 경로 상수에 의존하지 않는다.
+      - name: Stub config for standalone run
+        run: |
+          mkdir -p config
+          : > config/__init__.py
+          {
+            echo 'from pathlib import Path'
+            echo 'BASE_DIR = Path(__file__).resolve().parent.parent'
+            echo 'DATA_DIR = BASE_DIR / "data"'
+            echo 'EDA_DIR = DATA_DIR / "eda"'
+            echo 'MODELS_DIR = DATA_DIR / "models"'
+            echo 'REPORTS_DIR = BASE_DIR / "reports"'
+          } > config/settings.py
+
+      - name: Run discovery
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python tools/discover.py --root scan --out candidates.json
+          echo "--- 후보 요약 ---"
+          python -c "import json,sys; d=json.load(open('candidates.json',encoding='utf-8')); print('스캔',len(d['scanned_repos']),'· 후보 있는 곳',len(d['projects'])); [print(' ',p['project']['name'],':',len(p['A']),'/',len(p['B'])) for p in d['projects']]"
+
+      - name: Commit if changed
+        run: |
+          rm -rf scan tools config
+          if git diff --quiet -- candidates.json; then
+            echo "후보에 변화 없음 — 커밋 생략"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add candidates.json
+          git commit -m "chore: 과제 후보 갱신 (run ${{ github.run_id }})"
+          git push
