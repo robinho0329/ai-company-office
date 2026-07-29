@@ -25,7 +25,9 @@
   .srcDemo { background:#3a3626; color:#e0c14a; border:1px solid #6b5e2a; }
   .stDot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; vertical-align:-1px; border:1px solid #555; }
   /* 시나리오 단계 */
-  #stepList { font-size:11.5px; line-height:1.75; max-height:170px; overflow-y:auto; }
+  #stepList { font-size:11.5px; line-height:1.75; max-height:170px; overflow-y:auto;
+              transition:max-height .2s; }
+  body.gate #stepList { max-height:88px; }   /* 승인 대기 중엔 접어서 버튼 자리를 만든다 */
   .step { color:#6c7385; }
   .step.now { color:#f2c94c; font-weight:bold; }
   .step.done { color:#3ecfae; }
@@ -38,11 +40,16 @@
   button.speedOn { background:#f2c94c; color:#222; border-color:#f2c94c; }
   /* 승인 패널 */
   #approvalBox { display:none; background:#3d2436; border:1px solid #e0407a; border-radius:8px; padding:10px; margin-top:8px; }
-  #approvalBox.show { display:block; animation:pulse 1.4s infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,64,122,.5);} 50%{box-shadow:0 0 0 6px rgba(224,64,122,0);} }
   #approvalBox p { font-size:12px; margin-bottom:8px; }
-  #approvalTitle { font-size:12px; margin-bottom:8px; }
-  #approvalChoices { display:flex; flex-direction:column; gap:5px; }
+  /* 카드가 3장이면 박스가 패널 밖으로 밀려 버튼이 잘린다.
+     카드 영역만 스크롤시키고 버튼은 항상 박스 안에 남긴다. */
+  #approvalBox.show { display:flex; flex-direction:column; max-height:44vh;
+                      animation:pulse 1.4s infinite; }
+  #approvalTitle { font-size:12px; margin-bottom:8px; flex:0 0 auto; }
+  #approvalChoices { display:flex; flex-direction:column; gap:5px;
+                     overflow-y:auto; min-height:0; flex:1 1 auto; }
+  #approvalBtns { flex:0 0 auto; }
   .choice { border:1px solid #4a526a; border-radius:6px; padding:6px 8px; cursor:pointer;
             font-size:11.5px; line-height:1.5; background:#332a3d; }
   .choice:hover { border-color:#7a6a8a; }
@@ -335,7 +342,23 @@ function updateEmps(dt){
     }
     const nxt=e.path[0];
     const blocked=emps.some(o=>o!==e&&o.onsite&&o.path.length===0&&o.x===nxt.x&&o.y===nxt.y);
-    if(blocked){ const p=astar(e.x,e.y,e.goal.x,e.goal.y,occupiedSet(e)); if(p){e.path=p; continue;} }
+    if(blocked){
+      // 좁은 문에서 서로 막히면 매 프레임 경로만 다시 계산하며 영원히 못 간다.
+      // 카운터 없이 continue 하면 라이브락이고, 그 위에서 await 하던 코루틴이 통째로 멈춘다.
+      e.blockT=(e.blockT||0)+dt;
+      if(e.blockT<1.2){                                    // ① 잠깐 기다렸다 우회로 탐색
+        const p=astar(e.x,e.y,e.goal.x,e.goal.y,occupiedSet(e));
+        if(p&&p.length){ e.path=p; e.seg=0; continue; }
+      }
+      if(e.blockT<3.0) continue;                           // ② 우회로가 없으면 제자리 대기
+      if(e.blockT<5.0){                                    // ③ 점유를 무시하고 직진 경로
+        const p=astar(e.x,e.y,e.goal.x,e.goal.y,new Set());
+        if(p&&p.length){ e.path=p; e.seg=0; e.blockT=0; continue; }
+      }
+      e.x=e.goal.x; e.y=e.goal.y; e.path=[]; e.blockT=0;   // ④ 최후 — 목적지로 보낸다
+      continue;
+    }
+    e.blockT=0;
     e.seg+=spd*dt;
     if(e.seg>=1){ e.x=nxt.x; e.y=nxt.y; e.path.shift(); e.seg=0; }
   }
@@ -361,7 +384,13 @@ async function startWander(e){
 }
 async function recallDept(d){
   for(const e of deptEmps(d)) if(e.wandering) e.recall=true;
-  while(deptEmps(d).some(e=>e.wandering)) await wait(200);
+  // 상한 없이 기다리면 이동이 한 번 꼬였을 때 하루 전체가 멈춘다(진행률이 안 오른다)
+  for(let i=0;i<40 && deptEmps(d).some(e=>e.wandering);i++) await wait(200);
+  for(const e of deptEmps(d)) if(e.wandering){       // 끝내 안 돌아오면 자리로 되돌린다
+    e.wandering=false; e.recall=false;
+    e.x=e.chair.x; e.y=e.chair.y; e.path=[]; e.goal=null;
+    if(e.resolver){ const r=e.resolver; e.resolver=null; r(); }
+  }
 }
 function setDept(d,state){ for(const e of deptEmps(d)) e.state=state; }
 
@@ -813,6 +842,7 @@ async function requestApproval(cfg) {
   bbox.innerHTML = cfg.options.map(o =>
     `<button data-act="${o.id}" class="${o.cls || ''}">${o.label}</button>`).join('');
   document.getElementById('approvalBox').classList.add('show');
+  document.body.classList.add('gate');
 
   const res = await new Promise(resolve => {
     approvalGate = { cfg, resolve, since: performance.now(), pick: null };
@@ -821,6 +851,7 @@ async function requestApproval(cfg) {
 
   approvalGate = null;
   document.getElementById('approvalBox').classList.remove('show');
+  document.body.classList.remove('gate');
   cbox.innerHTML = ''; bbox.innerHTML = '';
   for (const n of seats) E(n).bubble = null;
   decisions.push({ title: cfg.title, action: res.action });
@@ -1096,6 +1127,7 @@ function resetDay(){
   if(approvalGate){                             // 게이트가 열린 채 리셋되면 코루틴이 영구 정지
     const g=approvalGate; approvalGate=null;
     document.getElementById('approvalBox').classList.remove('show');
+    document.body.classList.remove('gate');
     g.resolve({action:'중단',pick:null});
   }
   dayStarted=false; dayDone=false; curStep=-1; simMin=9*60;
