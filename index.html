@@ -718,9 +718,14 @@ let scannedRepos = [];    // 후보가 없는 것 포함, 스캔한 저장소 �
  *  못 읽으면 내장 예시로 폴백하되, 화면에 '예시'라고 표시한다. */
 async function loadCandidates() {
   try {
-    const res = await fetch('candidates.json', { cache:'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const d = await res.json();
+    // 임베드(iframe srcdoc)에서는 상대경로 fetch 가 동작하지 않는다.
+    // 호스트가 window.__CANDIDATES 로 주입해 주면 그것을 먼저 쓴다.
+    let d = window.__CANDIDATES;
+    if (!d) {
+      const res = await fetch('candidates.json', { cache:'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      d = await res.json();
+    }
     planProjects = Array.isArray(d.projects) && d.projects.length
       ? d.projects
       : (d.A || d.B ? [{ project: d.project, A: d.A || [], B: d.B || [] }] : []);
