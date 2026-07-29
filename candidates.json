@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-28T20:59:50+09:00",
+  "generated": "2026-07-29T11:53:26+09:00",
   "scanned_repos": [
     "ai-company-office",
     "H-M-data-analysis",
@@ -14,8 +14,8 @@
       "project": {
         "name": "mfg-anomaly-workflow",
         "remote": "https://github.com/robinho0329/mfg-anomaly-workflow",
-        "commit": "972ea9e",
-        "last_commit": "2026-07-28T20:56:34+09:00"
+        "commit": "fcae3c6",
+        "last_commit": "2026-07-29T10:53:14+09:00"
       },
       "A": [
         {
@@ -98,7 +98,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-04-28 — 91일 멈춤",
+          "note": "근거: 마지막 커밋 2026-04-28 — 92일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (0383253)",
@@ -116,44 +116,6 @@
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-04-24_meeting.md:90",
           "action": "reports/daily_meeting/2026-04-24_meeting.md 90행이 '실행 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-          "blanks": []
-        },
-        {
-          "label": "Scout_EDA.ipynb TODO 정리",
-          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAABbUAAAWICAYAAACC2Ck/AAAAOXRFWHRTb2Z0d2FyZQ\"",
-          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
-          "tags": "코드 주석",
-          "source": "notebooks/Scout_EDA.ipynb:1295",
-          "action": "notebooks/Scout_EDA.ipynb 1295행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
-          "blanks": []
-        }
-      ]
-    },
-    {
-      "project": {
-        "name": "H-M-data-analysis",
-        "remote": "https://github.com/robinho0329/H-M-data-analysis",
-        "commit": "c0108e9",
-        "last_commit": "2026-07-01T16:49:02+09:00"
-      },
-      "A": [],
-      "B": [
-        {
-          "label": "20251120_day2.ipynb TODO 정리",
-          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAAAxYAAAJOCAYAAAAqFJGJAAAAOnRFWHRTb2Z0d2FyZQ\"",
-          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
-          "tags": "코드 주석",
-          "source": "Raw data/20251120_day2.ipynb:3353",
-          "action": "Raw data/20251120_day2.ipynb 3353행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
-          "blanks": []
-        },
-        {
-          "label": "20251126_data_analysis_팀원 시각화 seaborn진행.ipynb TODO 정리",
-          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAAA2MAAAHZCAYAAAAL/+MzAAAAOnRFWHRTb2Z0d2FyZQ\"",
-          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
-          "tags": "코드 주석",
-          "source": "Raw data/20251126_data_analysis_팀원 시각화 seaborn진행.ipynb:2491",
-          "action": "Raw data/20251126_data_analysis_팀원 시각화 seaborn진행.ipynb 2491행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
           "blanks": []
         }
       ]
@@ -184,8 +146,8 @@
   "project": {
     "name": "mfg-anomaly-workflow",
     "remote": "https://github.com/robinho0329/mfg-anomaly-workflow",
-    "commit": "972ea9e",
-    "last_commit": "2026-07-28T20:56:34+09:00"
+    "commit": "fcae3c6",
+    "last_commit": "2026-07-29T10:53:14+09:00"
   },
   "A": [
     {
