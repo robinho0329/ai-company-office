@@ -1,19 +1,14 @@
 {
-  "generated": "2026-07-29T09:58:21+09:00",
+  "generated": "2026-07-28T20:59:50+09:00",
   "scanned_repos": [
-    "EPL-scouting-report-dashboard-project",
-    "H-M-data-analysis",
     "ai-company-office",
-    "chungbuk-air-quality-monitor",
+    "H-M-data-analysis",
+    "EPL-scouting-report-dashboard-project",
     "mfg-anomaly-workflow",
-    "power-grid-anomaly-monitor"
+    "power-grid-anomaly-monitor",
+    "chungbuk-air-quality-monitor"
   ],
   "note": "보유 저장소 전체를 스캔해 뽑은 후보다. 질문을 발명하지 않으며, 근거 문장과 파일 경로가 없는 후보는 만들지 않는다. 비용비·결정권자 등 사람이 정할 값은 비워 둔다.",
-  "blanks_for_owner": [
-    "오탐 1건 : 미탐 1건 비용비",
-    "이 분석으로 무엇을 결정하는가 + 결정권자",
-    "대상 태그의 조작 권한자"
-  ],
   "projects": [
     {
       "project": {
@@ -29,7 +24,12 @@
           "question": "IDV 3을 재구성오차 외 어떤 신호로 감시할 수 있는가",
           "tags": "xmeas_13 · xmeas_07",
           "source": "data/models/repeat_eval.json",
-          "action": "IDV 3을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_13 · xmeas_07)의 관리 한계를 설계한다"
+          "action": "IDV 3을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_13 · xmeas_07)의 관리 한계를 설계한다",
+          "blanks": [
+            "오탐 1건 : 미탐 1건 비용비",
+            "결정권자",
+            "대상 태그의 조작 권한자"
+          ]
         },
         {
           "label": "IDV 18 대체 감시 수단 설계",
@@ -37,7 +37,12 @@
           "question": "IDV 18을 재구성오차 외 어떤 신호로 감시할 수 있는가",
           "tags": "xmeas_19 · xmv_09",
           "source": "data/models/repeat_eval.json",
-          "action": "IDV 18을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_19 · xmv_09)의 관리 한계를 설계한다"
+          "action": "IDV 18을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_19 · xmv_09)의 관리 한계를 설계한다",
+          "blanks": [
+            "오탐 1건 : 미탐 1건 비용비",
+            "결정권자",
+            "대상 태그의 조작 권한자"
+          ]
         },
         {
           "label": "IDV 12 대체 감시 수단 설계",
@@ -45,7 +50,12 @@
           "question": "IDV 12을 재구성오차 외 어떤 신호로 감시할 수 있는가",
           "tags": "xmeas_16 · xmeas_07",
           "source": "data/models/repeat_eval.json",
-          "action": "IDV 12을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_16 · xmeas_07)의 관리 한계를 설계한다"
+          "action": "IDV 12을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_16 · xmeas_07)의 관리 한계를 설계한다",
+          "blanks": [
+            "오탐 1건 : 미탐 1건 비용비",
+            "결정권자",
+            "대상 태그의 조작 권한자"
+          ]
         }
       ],
       "B": [
@@ -55,7 +65,8 @@
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_20260728.md:58",
-          "action": "reports/daily_20260728.md 58행이 '착수 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+          "action": "reports/daily_20260728.md 58행이 '착수 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": []
         },
         {
           "label": "온라인 운영 시 동일 성능 측정",
@@ -63,7 +74,8 @@
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_20260728.md:59",
-          "action": "reports/daily_20260728.md 59행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+          "action": "reports/daily_20260728.md 59행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": []
         },
         {
           "label": "설비 귀속 측정",
@@ -71,7 +83,8 @@
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_20260728.md:67",
-          "action": "reports/daily_20260728.md 67행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+          "action": "reports/daily_20260728.md 67행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": []
         }
       ]
     },
@@ -79,17 +92,20 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "ed77f6a",
-        "last_commit": "2026-05-28T22:25:28Z"
+        "commit": "0383253",
+        "last_commit": "2026-04-28T09:49:39+09:00"
       },
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-05-28 — 61일 멈춤",
+          "note": "근거: 마지막 커밋 2026-04-28 — 91일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
-          "source": "git log -1 (ed77f6a)",
-          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다"
+          "source": "git log -1 (0383253)",
+          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
+          "blanks": [
+            "재개 / 아카이브 중 무엇인가"
+          ]
         }
       ],
       "B": [
@@ -99,25 +115,70 @@
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-04-24_meeting.md:90",
-          "action": "reports/daily_meeting/2026-04-24_meeting.md 90행이 '실행 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+          "action": "reports/daily_meeting/2026-04-24_meeting.md 90행이 '실행 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": []
         },
         {
-          "label": "Actions 연속 실행",
-          "note": "근거: \"### 2-5. Actions 연속 미실행 문제…\"",
-          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-          "tags": "이월 대장",
-          "source": "reports/daily_meeting/2026-05-14_meeting.md:116",
-          "action": "reports/daily_meeting/2026-05-14_meeting.md 116행이 '실행 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
-        },
-        {
-          "label": "2026-05-11 (4일 연속 실행",
-          "note": "근거: \"**가장 최근 Actions 결과:** 2026-05-11 (4일 연속 미실행 — 원인 불명)…\"",
-          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-          "tags": "이월 대장",
-          "source": "reports/daily_meeting/2026-05-15_meeting.md:41",
-          "action": "reports/daily_meeting/2026-05-15_meeting.md 41행이 '실행 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+          "label": "Scout_EDA.ipynb TODO 정리",
+          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAABbUAAAWICAYAAACC2Ck/AAAAOXRFWHRTb2Z0d2FyZQ\"",
+          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
+          "tags": "코드 주석",
+          "source": "notebooks/Scout_EDA.ipynb:1295",
+          "action": "notebooks/Scout_EDA.ipynb 1295행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
+          "blanks": []
         }
       ]
+    },
+    {
+      "project": {
+        "name": "H-M-data-analysis",
+        "remote": "https://github.com/robinho0329/H-M-data-analysis",
+        "commit": "c0108e9",
+        "last_commit": "2026-07-01T16:49:02+09:00"
+      },
+      "A": [],
+      "B": [
+        {
+          "label": "20251120_day2.ipynb TODO 정리",
+          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAAAxYAAAJOCAYAAAAqFJGJAAAAOnRFWHRTb2Z0d2FyZQ\"",
+          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
+          "tags": "코드 주석",
+          "source": "Raw data/20251120_day2.ipynb:3353",
+          "action": "Raw data/20251120_day2.ipynb 3353행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
+          "blanks": []
+        },
+        {
+          "label": "20251126_data_analysis_팀원 시각화 seaborn진행.ipynb TODO 정리",
+          "note": "근거: \"\"image/png\": \"iVBORw0KGgoAAAANSUhEUgAAA2MAAAHZCAYAAAAL/+MzAAAAOnRFWHRTb2Z0d2FyZQ\"",
+          "question": "이 TODO를 처리하면 무엇이 좋아지는가",
+          "tags": "코드 주석",
+          "source": "Raw data/20251126_data_analysis_팀원 시각화 seaborn진행.ipynb:2491",
+          "action": "Raw data/20251126_data_analysis_팀원 시각화 seaborn진행.ipynb 2491행의 TODO를 처리하거나, 불필요하면 근거와 함께 지운다",
+          "blanks": []
+        }
+      ]
+    },
+    {
+      "project": {
+        "name": "chungbuk-air-quality-monitor",
+        "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
+        "commit": "3ba75aa",
+        "last_commit": "2026-06-23T12:35:33+09:00"
+      },
+      "A": [
+        {
+          "label": "chungbuk-air-quality-monitor 재개 여부 결정",
+          "note": "근거: 마지막 커밋 2026-06-23 — 35일 멈춤",
+          "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
+          "tags": "저장소 상태",
+          "source": "git log -1 (3ba75aa)",
+          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
+          "blanks": [
+            "재개 / 아카이브 중 무엇인가"
+          ]
+        }
+      ],
+      "B": []
     }
   ],
   "project": {
@@ -133,7 +194,12 @@
       "question": "IDV 3을 재구성오차 외 어떤 신호로 감시할 수 있는가",
       "tags": "xmeas_13 · xmeas_07",
       "source": "data/models/repeat_eval.json",
-      "action": "IDV 3을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_13 · xmeas_07)의 관리 한계를 설계한다"
+      "action": "IDV 3을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_13 · xmeas_07)의 관리 한계를 설계한다",
+      "blanks": [
+        "오탐 1건 : 미탐 1건 비용비",
+        "결정권자",
+        "대상 태그의 조작 권한자"
+      ]
     },
     {
       "label": "IDV 18 대체 감시 수단 설계",
@@ -141,7 +207,12 @@
       "question": "IDV 18을 재구성오차 외 어떤 신호로 감시할 수 있는가",
       "tags": "xmeas_19 · xmv_09",
       "source": "data/models/repeat_eval.json",
-      "action": "IDV 18을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_19 · xmv_09)의 관리 한계를 설계한다"
+      "action": "IDV 18을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_19 · xmv_09)의 관리 한계를 설계한다",
+      "blanks": [
+        "오탐 1건 : 미탐 1건 비용비",
+        "결정권자",
+        "대상 태그의 조작 권한자"
+      ]
     },
     {
       "label": "IDV 12 대체 감시 수단 설계",
@@ -149,7 +220,12 @@
       "question": "IDV 12을 재구성오차 외 어떤 신호로 감시할 수 있는가",
       "tags": "xmeas_16 · xmeas_07",
       "source": "data/models/repeat_eval.json",
-      "action": "IDV 12을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_16 · xmeas_07)의 관리 한계를 설계한다"
+      "action": "IDV 12을 관리도·인터록·순회점검 중 무엇으로 덮을지 정하고, 감시 태그(xmeas_16 · xmeas_07)의 관리 한계를 설계한다",
+      "blanks": [
+        "오탐 1건 : 미탐 1건 비용비",
+        "결정권자",
+        "대상 태그의 조작 권한자"
+      ]
     }
   ],
   "B": [
@@ -159,7 +235,8 @@
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_20260728.md:58",
-      "action": "reports/daily_20260728.md 58행이 '착수 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+      "action": "reports/daily_20260728.md 58행이 '착수 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": []
     },
     {
       "label": "온라인 운영 시 동일 성능 측정",
@@ -167,7 +244,8 @@
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_20260728.md:59",
-      "action": "reports/daily_20260728.md 59행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+      "action": "reports/daily_20260728.md 59행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": []
     },
     {
       "label": "설비 귀속 측정",
@@ -175,7 +253,8 @@
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_20260728.md:67",
-      "action": "reports/daily_20260728.md 67행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다"
+      "action": "reports/daily_20260728.md 67행이 '측정 필요'로 남긴 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": []
     }
   ],
   "source_report": "mfg-anomaly-workflow"

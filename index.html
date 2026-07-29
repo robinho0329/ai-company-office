@@ -907,23 +907,21 @@ async function runPrologue(my) {
 function emitWorkOrder(pick, isA) {
   const proj = planProject ? planProject.name : '(대상 미상)';
   const at = planProject && planProject.commit ? ` @${planProject.commit}` : '';
-  const blanks = (planSource.blanks || []).map(b => `  - [ ] ${b}`).join('\n')
-    || '  - [ ] (없음)';
+  // note 가 이미 '근거:' 로 시작한다 — 접두어를 또 붙이면 "근거: 근거:" 가 된다
+  const note = String(pick.note || '').replace(/^\s*근거:\s*/, '');
+  // 빈칸은 후보마다 다르다. 저장소 재개 여부에 '오탐:미탐 비용비'를 물으면 안 된다
+  const blanks = (pick.blanks || []).map(b => `  - [ ] ${b}`).join('\n');
   const order =
 `[작업 지시서] ${proj}${at}
-모드: ${isA ? 'A · 신규 기획' : 'B · 기존 디벨롭'}   후보 출처: ${planSource.kind}
-채택 과제: ${pick.label}
-질문: ${pick.question}
-근거: ${pick.note}
-출처: ${pick.source || '(없음)'}
-대상 태그: ${pick.tags || '(미판정)'}
+모드: ${isA ? 'A · 신규 기획' : 'B · 기존 디벨롭'} · 후보 출처: ${planSource.kind}
+과제: ${pick.label}
 할 일: ${pick.action || '(미정)'}
-대표가 채워야 할 값:
-${blanks}`;
-  addMsg('예지완', order, false, true);
-  addMsg('유하람', '위 지시서를 복사해 작업 세션에 붙여넣으시면 실제로 진행됩니다. ' +
-                   '이 화면은 코드를 고치지 못합니다.');
-  window.__lastWorkOrder = order;   // 지시창 '지시서' 로 다시 꺼낼 수 있다
+근거: ${note}
+출처: ${pick.source || '(없음)'}` + (blanks ? `\n대표가 정할 것:\n${blanks}` : '');
+
+  // 지시창에는 두 줄만. 전체는 '지시서' 버튼으로 꺼낸다 — 매번 긴 블록이 뜨면 소음이다
+  addMsg('예지완', `${pick.label} → ${pick.action || '(할 일 미정)'}`);
+  window.__lastWorkOrder = order;
 }
 
 /* ── 하루 시나리오 (사규 §9) ── */
