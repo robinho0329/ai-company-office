@@ -113,6 +113,7 @@
         <button data-q="대상 프로젝트">대상 프로젝트</button>
         <button data-q="저장소 목록">저장소 목록</button>
         <button data-q="지시서">지시서</button>
+        <button data-q="결정 로그">결정 로그</button>
       </div>
       <div id="cmdRow">
         <input id="cmdInput" placeholder='예: "모델링팀 뭐해?" / "왜 막혔어?"'>
@@ -318,7 +319,12 @@ let simMin=9*60, curStep=-1;
 let approvalGate=null;
 // 하루 세대 토큰 — 리셋 후에도 이전 날의 코루틴이 살아 움직이는 것을 막는다.
 let dayEpoch=0;
-let decisions=[];  // [{title, action}] — 브리핑 집계 근거
+let decisions=[];  // 게이트 결정 로그 — 브리핑·내일 입력의 근거
+// 중간 반려 로그(재현성·운영팀 소관). 숫자 하나로는 '무엇이 왜 반려됐나'를 못 남긴다.
+let rejectLog=[];  // [{step, by, reason}]
+let waitLog=[];    // 데이터 대기 [{at, what}]
+/** 반려를 기록한다 — 여단우가 남기고, 비서실이 요약한다. */
+function logReject(stepKey, by, reason){ rejectLog.push({step:stepKey, by, reason}); rejectCount++; }
 let dataWaitMsg=null, rejectCount=0, decisionMade=null;
 const pendWaits=[];
 const wait=ms=>new Promise(res=>pendWaits.push({left:ms,res}));
@@ -762,9 +768,10 @@ async function loadCandidates() {
     if (!planProjects.length) throw new Error('후보 0개');
     projectIdx = projectIdx % planProjects.length;
     const cur = planProjects[projectIdx];
-    // 후보가 없는 모드는 내장 예시를 남겨 화면이 비지 않게 한다
-    PLAN_POOL.A = cur.A.length ? cur.A : PLAN_POOL.A;
-    PLAN_POOL.B = cur.B.length ? cur.B : PLAN_POOL.B;
+    // 후보가 0건이면 비운다. 이전 저장소 후보를 남기면 그 저장소 것이 아닌 과제가
+    // '실측' 배지를 달고 올라간다 — 출처 파일도 그 저장소에 없는 오발주가 된다.
+    PLAN_POOL.A = cur.A;
+    PLAN_POOL.B = cur.B;
     planProject = cur.project || null;
     planSource = { kind:'실측', detail:`${d.source_report} · ${d.generated.slice(0,16)}`,
                    blanks: d.blanks_for_owner || [] };
@@ -843,18 +850,29 @@ async function requestApproval(cfg) {
     `<button data-act="${o.id}" class="${o.cls || ''}">${o.label}</button>`).join('');
   document.getElementById('approvalBox').classList.add('show');
   document.body.classList.add('gate');
+  document.title = '★ 결재 대기 — 제조 데이터 분석팀 오피스';   // 자리를 비워도 알 수 있게
 
   const res = await new Promise(resolve => {
     approvalGate = { cfg, resolve, since: performance.now(), pick: null };
     syncGateButtons();   // 게이트가 설정된 뒤라야 잠금이 계산된다
   });
 
+  const approvalGate0 = approvalGate;
   approvalGate = null;
   document.getElementById('approvalBox').classList.remove('show');
   document.body.classList.remove('gate');
+  document.title = '제조 데이터 분석팀 오피스';
   cbox.innerHTML = ''; bbox.innerHTML = '';
   for (const n of seats) E(n).bubble = null;
-  decisions.push({ title: cfg.title, action: res.action });
+  // pick 을 버리면 브리핑이 '채택'이라는 동작만 말하고 무엇을 채택했는지 못 말한다.
+  decisions.push({
+    at: new Date().toTimeString().slice(0, 5),
+    title: cfg.title.replace(/[★—]/g, '').trim(),
+    action: res.action,
+    pick: res.pick ? res.pick.label : null,
+    options: (cfg.choices || []).map(c => c.label),   // 무엇 중에서 골랐는가
+    waited: Math.round((performance.now() - approvalGate0.since) / 1000),
+  });
   addMsg('대표', `[${res.action}]` + (res.pick ? ` ${res.pick.label}` : ''), true);
   return res;
 }
@@ -947,17 +965,27 @@ function emitWorkOrder(pick, isA) {
   const note = String(pick.note || '').replace(/^\s*근거:\s*/, '');
   // 빈칸은 후보마다 다르다. 저장소 재개 여부에 '오탐:미탐 비용비'를 물으면 안 된다
   const blanks = (pick.blanks || []).map(b => `  - [ ] ${b}`).join('\n');
+  // 받는 사람이 바로 착수할 수 있어야 한다 — 저장소를 어디서 받고, 무엇이 나오면 끝인지.
+  const clone = planProject && planProject.clone
+    ? planProject.clone
+    : (planProject && planProject.remote
+        ? `git clone ${planProject.remote}` + (planProject.commit ? ` && git checkout ${planProject.commit}` : '')
+        : '(remote 미상)');
   const order =
 `[작업 지시서] ${proj}${at}
-모드: ${isA ? 'A · 신규 기획' : 'B · 기존 디벨롭'} · 후보 출처: ${planSource.kind}
+발행: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} · 모드 ${isA ? 'A · 신규 기획' : 'B · 기존 디벨롭'} · 후보 출처 ${planSource.kind}
+받기: ${clone}
 과제: ${pick.label}
 할 일: ${pick.action || '(미정)'}
+완료 판정: ${pick.done || '아래 빈칸이 모두 채워지고, 근거 문장을 문서에서 지울 수 있는 상태'}
 근거: ${note}
-출처: ${pick.source || '(없음)'}` + (blanks ? `\n대표가 정할 것:\n${blanks}` : '');
+출처: ${pick.source || '(없음)'}
+수행자: (대표가 지정)` + (blanks ? `\n대표가 정할 것 — 비면 착수 보류:\n${blanks}` : '');
 
   // 지시창에는 두 줄만. 전체는 '지시서' 버튼으로 꺼낸다 — 매번 긴 블록이 뜨면 소음이다
   addMsg('예지완', `${pick.label} → ${pick.action || '(할 일 미정)'}`);
   window.__lastWorkOrder = order;
+  window.__orderState = '채택';
 }
 
 /* ── 하루 시나리오 (사규 §9) ── */
@@ -1020,6 +1048,7 @@ async function runDay(){
   } else {
   setDept(1,'데이터 대기'); await recallDept(1);
   dataWaitMsg='GitHub 원격 데이터 스냅샷이 아직 없어 수집팀이 데이터 대기 중';
+  waitLog.push({at:document.getElementById('clock').textContent, what:'원격 스냅샷'});
   await say(E('신유빈'),'GitHub 원격 데이터 당겨오는 중… (데이터 대기)',3200);
   dataWaitMsg=null; setDept(1,'진행 중');
   await say(E('하도윤'),'원본은 안 건드렸습니다. 복제본이에요.');
@@ -1044,7 +1073,8 @@ async function runDay(){
   setDept(3,'완료'); await handoff('백서윤',4,'검정 통과 변수 목록입니다.');
 
   step('feature'); setDept(4,'진행 중'); await recallDept(4);
-  await say(E('류하진'),'미래 정보 들어갔습니다. 반려요.'); rejectCount++;
+  await say(E('류하진'),'미래 정보 들어갔습니다. 반려요.');
+  logReject('feature','류하진','피처 누수 — 미래 정보 유입');
   await say(E('배준혁'),"롤링 윈도우로 다시. 의미는 '냉각 지연'입니다.");
   setDept(4,'완료'); await handoff('류하진',5,'피처 명세 전달합니다.');
 
@@ -1056,7 +1086,8 @@ async function runDay(){
 
   step('qa1'); setDept(6,'진행 중'); await recallDept(6);
   await say(E('진세호'),'시간 경계 언제예요? 갭은요?');
-  await say(E('마유나'),'± 없는 단일 수치는 못 넘깁니다.'); rejectCount++;
+  await say(E('마유나'),'± 없는 단일 수치는 못 넘깁니다.');
+  logReject('qa1','마유나','불확실성 미표기 — ± 없는 단일 점추정');
   await say(E('최시온'),'시드 3회 평균으로 다시 받았습니다. 통과.');
   setDept(6,'완료'); await handoff('진세호',7,'검수 통과분 전달합니다.');
 
@@ -1095,23 +1126,40 @@ async function runDay(){
     setDept(7,'완료');
   }
   for(const n of gate){ E(n).state='완료'; E(n).inMeeting=false; walkTo(E(n),E(n).chair.x,E(n).chair.y); }
+  // 결재 결과를 지시서에 반영한다. 폐기·보류한 건이 다음 날 '지시서' 로 다시 나오면 안 된다.
+  window.__orderState=decisionMade;
+  if(window.__lastWorkOrder){
+    window.__lastWorkOrder = (decisionMade==='승인')
+      ? window.__lastWorkOrder.replace('[작업 지시서]', `[작업 지시서 · 승인 ${new Date().toISOString().slice(0,16).replace('T',' ')}]`)
+      : `⛔ ${decisionMade} — 착수 금지
+` + window.__lastWorkOrder;
+  }
 
   step('repro');
   if(decisionMade==='승인'){
     setDept(10,'진행 중'); await recallDept(10);
     await say(E('문상우'),'지문 기록했습니다. 재현 커맨드도요.');
+    await say(E('여단우'),
+      `결정 ${decisions.length}건·반려 ${rejectLog.length}건 남겼습니다. 요약은 안 합니다.`, 2600);
     setDept(10,'완료');
   }
   setDept(11,'진행 중'); await recallDept(11);
   const sec=E('유하람'); sec.inMeeting=true;
   await walkTo(sec,BRIEF_SPOT.x,BRIEF_SPOT.y);
   await say(sec,'오늘 결정하실 건 1개였습니다.',3000);
+  const 결재 = decisions.map(d => d.pick ? `${d.action}(${d.pick})` : d.action).join(' / ') || '없음';
+  const 반려 = rejectLog.length
+    ? `${rejectLog.length}건 — ` + rejectLog.map(r => `${r.by}: ${r.reason}`).join(' · ')
+    : '없음';
+  const 대기 = waitLog.length
+    ? ` · 데이터 대기 ${waitLog.map(w => `${w.at} ${w.what}`).join(', ')}`
+    : '';
   addMsg('유하람',
 `① 오늘 완료: ${steps.length}단계 중 ${decisionMade==='승인'?steps.length:steps.length-1}단계 (${MODE_LABEL[mode]})
 ② 진행 중: 없음
-③ 대표 결재: ${decisions.length}건 — ${decisions.map(d=>d.action).join(' / ')}
-④ 막힌 것: 반려 ${rejectCount}건(피처 누수 1·불확실성 1) → 재작업 완료
-⑤ 오늘 대표가 결정할 것: ${decisions.length}건 (완료)`,false,true);
+③ 대표 결재: ${decisions.length}건 — ${결재}
+④ 막힌 것: ${반려}${대기} → 재작업 완료
+⑤ 오늘 대표가 결정할 것: 없음 (${decisions.length}건 모두 처리됨)`,false,true);
   await walkTo(sec,sec.chair.x,sec.chair.y); sec.inMeeting=false;
   setDept(11,'완료');
   curStep=steps.length; dayDone=true;
@@ -1132,6 +1180,8 @@ function resetDay(){
   }
   dayStarted=false; dayDone=false; curStep=-1; simMin=9*60;
   rejectCount=0; decisionMade=null; dataWaitMsg=null; decisions=[]; ctx=null;
+  rejectLog=[]; waitLog=[];
+  window.__lastWorkOrder=null; window.__orderState=null;   // 어제 지시서를 오늘 꺼내지 못하게
   if(nextMode){ mode=nextMode; nextMode=null; }   // 예약된 모드는 다음 날부터 적용
   if(planProjects.length) projectIdx=(projectIdx+1)%planProjects.length;  // 내일은 다음 저장소
   steps=(mode==='F'?[]:PROLOGUE_STEPS[mode]).concat(CORE_STEPS);
@@ -1176,6 +1226,18 @@ function handleCommand(raw){
     addMsg('유하람',`현재 ${document.getElementById('clock').textContent} · 단계 ${Math.max(curStep+1,0)}/${steps.length} — ${cur}. 다음은 ${nxt}입니다.`);
     return; }
   if(t.includes('왜')&&(t.includes('막')||t.includes('늦'))){ addMsg('유하람',bottleneckAnswer()); return; }
+  if(t.includes('결정로그')||t.includes('기록')||t.includes('반려내역')){
+    if(!decisions.length && !rejectLog.length){ addMsg('여단우','오늘 남길 결정이 아직 없습니다.'); return; }
+    addMsg('여단우',
+      '[결정 로그]\n' +
+      (decisions.map(d=>`${d.at} ${d.title} → ${d.action}` +
+        (d.pick?` (${d.pick})`:'') +
+        (d.options.length>1?`  후보 ${d.options.length}개 중`:'') +
+        `  대기 ${d.waited}초`).join('\n') || '(없음)') +
+      '\n[반려]\n' +
+      (rejectLog.map(r=>`${r.step} · ${r.by}: ${r.reason}`).join('\n') || '(없음)'),
+      false, true);
+    return; }
   if(t.includes('지시서')||t.includes('작업지시')){
     if(window.__lastWorkOrder){ addMsg('예지완', window.__lastWorkOrder, false, true); }
     else addMsg('예지완','아직 채택된 과제가 없습니다. 채택 후에 지시서가 나옵니다.');
@@ -1271,7 +1333,7 @@ document.getElementById('cmdInput').addEventListener('keydown',e=>{ if(e.key==='
 
 /* ── 초기화 ── */
 buildMap(); buildEmps();
-addMsg('유하람','사규 34명 편성으로 대기 중입니다. 5초 후 자동 출근합니다 — ⑪ 대표 승인에서만 기다릴게요.');
+addMsg('유하람','사규 34명 편성으로 대기 중입니다. 5초 후 자동 출근합니다 — ★채택·★승인 두 곳에서 기다릴게요.');
 document.getElementById('btnStart').textContent='하루 시작 (5초 후 자동)';
 setInterval(loop,33);
 </script>
