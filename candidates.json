@@ -1,14 +1,14 @@
 {
-  "generated": "2026-07-30T11:33:30+09:00",
+  "generated": "2026-07-31T10:06:55+09:00",
   "scanned_repos": [
-    "ai-company-office",
-    "H-M-data-analysis",
     "EPL-scouting-report-dashboard-project",
-    "power-grid-anomaly-monitor",
-    "chungbuk-air-quality-monitor"
+    "H-M-data-analysis",
+    "ai-company-office",
+    "chungbuk-air-quality-monitor",
+    "power-grid-anomaly-monitor"
   ],
   "unavailable": {
-    "ai-company-office": [
+    "EPL-scouting-report-dashboard-project": [
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
     ],
@@ -16,15 +16,15 @@
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
     ],
-    "EPL-scouting-report-dashboard-project": [
-      "data/models/repeat_eval.json",
-      "data/eda/fault_signature.json"
-    ],
-    "power-grid-anomaly-monitor": [
+    "ai-company-office": [
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
     ],
     "chungbuk-air-quality-monitor": [
+      "data/models/repeat_eval.json",
+      "data/eda/fault_signature.json"
+    ],
+    "power-grid-anomaly-monitor": [
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
     ]
@@ -35,17 +35,17 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "0383253",
-        "last_commit": "2026-04-28T09:49:39+09:00",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 0383253"
+        "commit": "ed77f6a",
+        "last_commit": "2026-05-28T22:25:28Z",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ed77f6a"
       },
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-04-28 — 93일 멈춤",
+          "note": "근거: 마지막 커밋 2026-05-28 — 63일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
-          "source": "git log -1 (0383253)",
+          "source": "git log -1 (ed77f6a)",
           "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
           "blanks": [
             "재개 / 아카이브 중 무엇인가"
@@ -54,13 +54,37 @@
       ],
       "B": [
         {
-          "label": "절대경로 하드코딩 제거",
-          "note": "근거: 3개 파일에 로컬 절대경로 — 예 \"BASE_DIR = \"C:/Users/xcv54/workspace/EPL project/data/raw/fbref\"\"",
-          "question": "이 저장소를 다른 PC에서 클론하면 어디서 멈추는가",
-          "source": "analyze_matchlogs.py:19",
-          "action": "절대경로를 pathlib 기준 상대경로로 바꾸고, 클론 직후 실행되는지 확인한다",
-          "blanks": [],
-          "tags": "저장소 위생"
+          "label": "Actions 연속 실행",
+          "note": "근거: \"### 2-5. Actions 연속 미실행 문제…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "reports/daily_meeting/2026-05-14_meeting.md:116",
+          "action": "reports/daily_meeting/2026-05-14_meeting.md:116 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
+        },
+        {
+          "label": "2026-05-11 (4일 연속 실행",
+          "note": "근거: \"**가장 최근 Actions 결과:** 2026-05-11 (4일 연속 미실행 — 원인 불명)…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "reports/daily_meeting/2026-05-15_meeting.md:41",
+          "action": "reports/daily_meeting/2026-05-15_meeting.md:41 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
+        },
+        {
+          "label": "GitHub Actions 4일 연속 실행",
+          "note": "근거: \"### 2-2. GitHub Actions 4일 연속 미실행 — 오늘 최우선 해결…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "reports/daily_meeting/2026-05-15_meeting.md:59",
+          "action": "reports/daily_meeting/2026-05-15_meeting.md:59 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
         }
       ]
     },
@@ -100,9 +124,9 @@
       "project": {
         "name": "ai-company-office",
         "remote": "https://github.com/robinho0329/ai-company-office",
-        "commit": "ec00748",
-        "last_commit": "2026-07-29T11:53:46+09:00",
-        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout ec00748"
+        "commit": "a3628b2",
+        "last_commit": "2026-07-30T11:39:24+09:00",
+        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout a3628b2"
       },
       "A": [],
       "B": [
@@ -127,45 +151,22 @@
           "tags": "저장소 위생"
         }
       ]
-    },
-    {
-      "project": {
-        "name": "chungbuk-air-quality-monitor",
-        "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
-        "commit": "3ba75aa",
-        "last_commit": "2026-06-23T12:35:33+09:00",
-        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout 3ba75aa"
-      },
-      "A": [
-        {
-          "label": "chungbuk-air-quality-monitor 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-06-23 — 36일 멈춤",
-          "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
-          "tags": "저장소 상태",
-          "source": "git log -1 (3ba75aa)",
-          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
-          "blanks": [
-            "재개 / 아카이브 중 무엇인가"
-          ]
-        }
-      ],
-      "B": []
     }
   ],
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "0383253",
-    "last_commit": "2026-04-28T09:49:39+09:00",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 0383253"
+    "commit": "ed77f6a",
+    "last_commit": "2026-05-28T22:25:28Z",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ed77f6a"
   },
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-04-28 — 93일 멈춤",
+      "note": "근거: 마지막 커밋 2026-05-28 — 63일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
-      "source": "git log -1 (0383253)",
+      "source": "git log -1 (ed77f6a)",
       "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
       "blanks": [
         "재개 / 아카이브 중 무엇인가"
@@ -174,13 +175,37 @@
   ],
   "B": [
     {
-      "label": "절대경로 하드코딩 제거",
-      "note": "근거: 3개 파일에 로컬 절대경로 — 예 \"BASE_DIR = \"C:/Users/xcv54/workspace/EPL project/data/raw/fbref\"\"",
-      "question": "이 저장소를 다른 PC에서 클론하면 어디서 멈추는가",
-      "source": "analyze_matchlogs.py:19",
-      "action": "절대경로를 pathlib 기준 상대경로로 바꾸고, 클론 직후 실행되는지 확인한다",
-      "blanks": [],
-      "tags": "저장소 위생"
+      "label": "Actions 연속 실행",
+      "note": "근거: \"### 2-5. Actions 연속 미실행 문제…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_meeting/2026-05-14_meeting.md:116",
+      "action": "reports/daily_meeting/2026-05-14_meeting.md:116 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": [
+        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+      ]
+    },
+    {
+      "label": "2026-05-11 (4일 연속 실행",
+      "note": "근거: \"**가장 최근 Actions 결과:** 2026-05-11 (4일 연속 미실행 — 원인 불명)…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_meeting/2026-05-15_meeting.md:41",
+      "action": "reports/daily_meeting/2026-05-15_meeting.md:41 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": [
+        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+      ]
+    },
+    {
+      "label": "GitHub Actions 4일 연속 실행",
+      "note": "근거: \"### 2-2. GitHub Actions 4일 연속 미실행 — 오늘 최우선 해결…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_meeting/2026-05-15_meeting.md:59",
+      "action": "reports/daily_meeting/2026-05-15_meeting.md:59 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": [
+        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+      ]
     }
   ],
   "source_report": "EPL-scouting-report-dashboard-project"
