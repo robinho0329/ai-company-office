@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-31T10:06:55+09:00",
+  "generated": "2026-08-01T10:04:41+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -42,7 +42,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-05-28 — 63일 멈춤",
+          "note": "근거: 마지막 커밋 2026-05-28 — 64일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (ed77f6a)",
@@ -96,7 +96,19 @@
         "last_commit": "2026-07-01T16:49:02+09:00",
         "clone": "git clone https://github.com/robinho0329/H-M-data-analysis && git checkout c0108e9"
       },
-      "A": [],
+      "A": [
+        {
+          "label": "H-M-data-analysis 재개 여부 결정",
+          "note": "근거: 마지막 커밋 2026-07-01 — 30일 멈춤",
+          "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
+          "tags": "저장소 상태",
+          "source": "git log -1 (c0108e9)",
+          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
+          "blanks": [
+            "재개 / 아카이브 중 무엇인가"
+          ]
+        }
+      ],
       "B": [
         {
           "label": "회귀 테스트 도입",
@@ -124,9 +136,9 @@
       "project": {
         "name": "ai-company-office",
         "remote": "https://github.com/robinho0329/ai-company-office",
-        "commit": "a3628b2",
-        "last_commit": "2026-07-30T11:39:24+09:00",
-        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout a3628b2"
+        "commit": "aba3b68",
+        "last_commit": "2026-07-31T01:06:55Z",
+        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout aba3b68"
       },
       "A": [],
       "B": [
@@ -163,7 +175,7 @@
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-05-28 — 63일 멈춤",
+      "note": "근거: 마지막 커밋 2026-05-28 — 64일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
       "source": "git log -1 (ed77f6a)",
