@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-02T10:08:42+09:00",
+  "generated": "2026-08-03T10:08:01+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -42,7 +42,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-05-28 — 65일 멈춤",
+          "note": "근거: 마지막 커밋 2026-05-28 — 66일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (ed77f6a)",
@@ -99,7 +99,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-07-01 — 31일 멈춤",
+          "note": "근거: 마지막 커밋 2026-07-01 — 32일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (c0108e9)",
@@ -136,9 +136,9 @@
       "project": {
         "name": "ai-company-office",
         "remote": "https://github.com/robinho0329/ai-company-office",
-        "commit": "46209fa",
-        "last_commit": "2026-08-01T01:04:41Z",
-        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout 46209fa"
+        "commit": "107c717",
+        "last_commit": "2026-08-02T01:08:42Z",
+        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout 107c717"
       },
       "A": [],
       "B": [
@@ -163,6 +163,27 @@
           "tags": "저장소 위생"
         }
       ]
+    },
+    {
+      "project": {
+        "name": "chungbuk-air-quality-monitor",
+        "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
+        "commit": "e83a12a",
+        "last_commit": "2026-08-03T00:17:43Z",
+        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout e83a12a"
+      },
+      "A": [],
+      "B": [
+        {
+          "label": "🌬️ 충북 대기질 자동 수집 실패 복구",
+          "note": "근거: 최근 실행 실패 — \"🌬️ 충북 대기질 자동 수집\"",
+          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+          "tags": "CI",
+          "source": "https://github.com/robinho0329/chungbuk-air-quality-monitor/actions",
+          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+          "blanks": []
+        }
+      ]
     }
   ],
   "project": {
@@ -175,7 +196,7 @@
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-05-28 — 65일 멈춤",
+      "note": "근거: 마지막 커밋 2026-05-28 — 66일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
       "source": "git log -1 (ed77f6a)",
