@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-03T10:08:01+09:00",
+  "generated": "2026-08-04T10:01:31+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -35,110 +35,9 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "ed77f6a",
-        "last_commit": "2026-05-28T22:25:28Z",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ed77f6a"
-      },
-      "A": [
-        {
-          "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-05-28 — 66일 멈춤",
-          "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
-          "tags": "저장소 상태",
-          "source": "git log -1 (ed77f6a)",
-          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
-          "blanks": [
-            "재개 / 아카이브 중 무엇인가"
-          ]
-        }
-      ],
-      "B": [
-        {
-          "label": "Actions 연속 실행",
-          "note": "근거: \"### 2-5. Actions 연속 미실행 문제…\"",
-          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-          "tags": "이월 대장",
-          "source": "reports/daily_meeting/2026-05-14_meeting.md:116",
-          "action": "reports/daily_meeting/2026-05-14_meeting.md:116 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-          "blanks": [
-            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-          ]
-        },
-        {
-          "label": "2026-05-11 (4일 연속 실행",
-          "note": "근거: \"**가장 최근 Actions 결과:** 2026-05-11 (4일 연속 미실행 — 원인 불명)…\"",
-          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-          "tags": "이월 대장",
-          "source": "reports/daily_meeting/2026-05-15_meeting.md:41",
-          "action": "reports/daily_meeting/2026-05-15_meeting.md:41 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-          "blanks": [
-            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-          ]
-        },
-        {
-          "label": "GitHub Actions 4일 연속 실행",
-          "note": "근거: \"### 2-2. GitHub Actions 4일 연속 미실행 — 오늘 최우선 해결…\"",
-          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-          "tags": "이월 대장",
-          "source": "reports/daily_meeting/2026-05-15_meeting.md:59",
-          "action": "reports/daily_meeting/2026-05-15_meeting.md:59 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-          "blanks": [
-            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-          ]
-        }
-      ]
-    },
-    {
-      "project": {
-        "name": "H-M-data-analysis",
-        "remote": "https://github.com/robinho0329/H-M-data-analysis",
-        "commit": "c0108e9",
-        "last_commit": "2026-07-01T16:49:02+09:00",
-        "clone": "git clone https://github.com/robinho0329/H-M-data-analysis && git checkout c0108e9"
-      },
-      "A": [
-        {
-          "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-07-01 — 32일 멈춤",
-          "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
-          "tags": "저장소 상태",
-          "source": "git log -1 (c0108e9)",
-          "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
-          "blanks": [
-            "재개 / 아카이브 중 무엇인가"
-          ]
-        }
-      ],
-      "B": [
-        {
-          "label": "회귀 테스트 도입",
-          "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
-          "question": "어느 함수부터 테스트로 고정할 것인가",
-          "source": "tests/ (없음)",
-          "action": "핵심 함수 3개에 pytest 를 붙이고 CI 에서 돌게 한다",
-          "blanks": [
-            "먼저 고정할 함수 3개"
-          ],
-          "tags": "저장소 위생"
-        },
-        {
-          "label": "CI 워크플로우 추가",
-          "note": "근거: .github/workflows 없음 — 푸시가 무엇도 검증하지 않는다",
-          "question": "푸시마다 무엇을 자동으로 확인할 것인가",
-          "source": ".github/workflows (없음)",
-          "action": "임포트 확인·테스트 실행 최소 CI 를 추가하고 배지를 README 에 붙인다",
-          "blanks": [],
-          "tags": "저장소 위생"
-        }
-      ]
-    },
-    {
-      "project": {
-        "name": "ai-company-office",
-        "remote": "https://github.com/robinho0329/ai-company-office",
-        "commit": "107c717",
-        "last_commit": "2026-08-02T01:08:42Z",
-        "clone": "git clone https://github.com/robinho0329/ai-company-office && git checkout 107c717"
+        "commit": "652c73a",
+        "last_commit": "2026-08-03T19:03:36+09:00",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 652c73a"
       },
       "A": [],
       "B": [
@@ -152,36 +51,6 @@
             "먼저 고정할 함수 3개"
           ],
           "tags": "저장소 위생"
-        },
-        {
-          "label": "의존성 명세 작성",
-          "note": "근거: requirements.txt·pyproject.toml 모두 없음 — 환경을 재현할 수 없다",
-          "question": "이 저장소를 돌리려면 무엇이 필요한가",
-          "source": "requirements.txt (없음)",
-          "action": "실제 임포트를 근거로 의존성을 고정 버전으로 적는다",
-          "blanks": [],
-          "tags": "저장소 위생"
-        }
-      ]
-    },
-    {
-      "project": {
-        "name": "chungbuk-air-quality-monitor",
-        "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
-        "commit": "e83a12a",
-        "last_commit": "2026-08-03T00:17:43Z",
-        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout e83a12a"
-      },
-      "A": [],
-      "B": [
-        {
-          "label": "🌬️ 충북 대기질 자동 수집 실패 복구",
-          "note": "근거: 최근 실행 실패 — \"🌬️ 충북 대기질 자동 수집\"",
-          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
-          "tags": "CI",
-          "source": "https://github.com/robinho0329/chungbuk-air-quality-monitor/actions",
-          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
-          "blanks": []
         }
       ]
     }
@@ -189,56 +58,22 @@
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "ed77f6a",
-    "last_commit": "2026-05-28T22:25:28Z",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ed77f6a"
+    "commit": "652c73a",
+    "last_commit": "2026-08-03T19:03:36+09:00",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 652c73a"
   },
-  "A": [
-    {
-      "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-05-28 — 66일 멈춤",
-      "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
-      "tags": "저장소 상태",
-      "source": "git log -1 (ed77f6a)",
-      "action": "재개한다면 다음 과제 1개를 정하고, 아니면 README에 중단 사유를 남긴다",
-      "blanks": [
-        "재개 / 아카이브 중 무엇인가"
-      ]
-    }
-  ],
+  "A": [],
   "B": [
     {
-      "label": "Actions 연속 실행",
-      "note": "근거: \"### 2-5. Actions 연속 미실행 문제…\"",
-      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-      "tags": "이월 대장",
-      "source": "reports/daily_meeting/2026-05-14_meeting.md:116",
-      "action": "reports/daily_meeting/2026-05-14_meeting.md:116 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "label": "회귀 테스트 도입",
+      "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
+      "question": "어느 함수부터 테스트로 고정할 것인가",
+      "source": "tests/ (없음)",
+      "action": "핵심 함수 3개에 pytest 를 붙이고 CI 에서 돌게 한다",
       "blanks": [
-        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-      ]
-    },
-    {
-      "label": "2026-05-11 (4일 연속 실행",
-      "note": "근거: \"**가장 최근 Actions 결과:** 2026-05-11 (4일 연속 미실행 — 원인 불명)…\"",
-      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-      "tags": "이월 대장",
-      "source": "reports/daily_meeting/2026-05-15_meeting.md:41",
-      "action": "reports/daily_meeting/2026-05-15_meeting.md:41 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-      "blanks": [
-        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-      ]
-    },
-    {
-      "label": "GitHub Actions 4일 연속 실행",
-      "note": "근거: \"### 2-2. GitHub Actions 4일 연속 미실행 — 오늘 최우선 해결…\"",
-      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
-      "tags": "이월 대장",
-      "source": "reports/daily_meeting/2026-05-15_meeting.md:59",
-      "action": "reports/daily_meeting/2026-05-15_meeting.md:59 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
-      "blanks": [
-        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
-      ]
+        "먼저 고정할 함수 3개"
+      ],
+      "tags": "저장소 위생"
     }
   ],
   "source_report": "EPL-scouting-report-dashboard-project"
