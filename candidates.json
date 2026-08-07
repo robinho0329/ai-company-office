@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-06T09:52:16+09:00",
+  "generated": "2026-08-07T10:52:58+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -35,12 +35,21 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "652c73a",
-        "last_commit": "2026-08-03T19:03:36+09:00",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 652c73a"
+        "commit": "ceb2dc5",
+        "last_commit": "2026-08-07T01:32:58Z",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ceb2dc5"
       },
       "A": [],
       "B": [
+        {
+          "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
+          "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
+          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+          "tags": "CI",
+          "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
+          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+          "blanks": []
+        },
         {
           "label": "회귀 테스트 도입",
           "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
@@ -58,12 +67,21 @@
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "652c73a",
-    "last_commit": "2026-08-03T19:03:36+09:00",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 652c73a"
+    "commit": "ceb2dc5",
+    "last_commit": "2026-08-07T01:32:58Z",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout ceb2dc5"
   },
   "A": [],
   "B": [
+    {
+      "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
+      "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
+      "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+      "tags": "CI",
+      "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
+      "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+      "blanks": []
+    },
     {
       "label": "회귀 테스트 도입",
       "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
