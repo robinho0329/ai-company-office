@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-08T09:00:28+09:00",
+  "generated": "2026-08-09T08:56:21+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -35,21 +35,12 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "92b02e5",
-        "last_commit": "2026-08-07T21:54:40Z",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 92b02e5"
+        "commit": "8312e4c",
+        "last_commit": "2026-08-08T21:41:19Z",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 8312e4c"
       },
       "A": [],
       "B": [
-        {
-          "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
-          "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
-          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
-          "tags": "CI",
-          "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
-          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
-          "blanks": []
-        },
         {
           "label": "회귀 테스트 도입",
           "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
@@ -62,26 +53,38 @@
           "tags": "저장소 위생"
         }
       ]
+    },
+    {
+      "project": {
+        "name": "chungbuk-air-quality-monitor",
+        "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
+        "commit": "92b1247",
+        "last_commit": "2026-08-08T20:16:03Z",
+        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout 92b1247"
+      },
+      "A": [],
+      "B": [
+        {
+          "label": "🌬️ 충북 대기질 자동 수집 실패 복구",
+          "note": "근거: 최근 실행 실패 — \"🌬️ 충북 대기질 자동 수집\"",
+          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+          "tags": "CI",
+          "source": "https://github.com/robinho0329/chungbuk-air-quality-monitor/actions",
+          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+          "blanks": []
+        }
+      ]
     }
   ],
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "92b02e5",
-    "last_commit": "2026-08-07T21:54:40Z",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 92b02e5"
+    "commit": "8312e4c",
+    "last_commit": "2026-08-08T21:41:19Z",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 8312e4c"
   },
   "A": [],
   "B": [
-    {
-      "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
-      "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
-      "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
-      "tags": "CI",
-      "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
-      "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
-      "blanks": []
-    },
     {
       "label": "회귀 테스트 도입",
       "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
