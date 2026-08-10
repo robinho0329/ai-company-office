@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-09T08:56:21+09:00",
+  "generated": "2026-08-10T09:00:06+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -35,12 +35,23 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "8312e4c",
-        "last_commit": "2026-08-08T21:41:19Z",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 8312e4c"
+        "commit": "472cadd",
+        "last_commit": "2026-08-09T21:22:37Z",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 472cadd"
       },
       "A": [],
       "B": [
+        {
+          "label": "py의 경로 전환도 실행",
+          "note": "근거(0일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
+          "action": "reports/daily_meeting/2026-08-09_meeting.md:49 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
+        },
         {
           "label": "회귀 테스트 도입",
           "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
@@ -58,9 +69,9 @@
       "project": {
         "name": "chungbuk-air-quality-monitor",
         "remote": "https://github.com/robinho0329/chungbuk-air-quality-monitor",
-        "commit": "92b1247",
-        "last_commit": "2026-08-08T20:16:03Z",
-        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout 92b1247"
+        "commit": "b802b51",
+        "last_commit": "2026-08-09T19:16:04Z",
+        "clone": "git clone https://github.com/robinho0329/chungbuk-air-quality-monitor && git checkout b802b51"
       },
       "A": [],
       "B": [
@@ -79,12 +90,23 @@
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "8312e4c",
-    "last_commit": "2026-08-08T21:41:19Z",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 8312e4c"
+    "commit": "472cadd",
+    "last_commit": "2026-08-09T21:22:37Z",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 472cadd"
   },
   "A": [],
   "B": [
+    {
+      "label": "py의 경로 전환도 실행",
+      "note": "근거(0일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+      "tags": "이월 대장",
+      "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
+      "action": "reports/daily_meeting/2026-08-09_meeting.md:49 가 실행 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+      "blanks": [
+        "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+      ]
+    },
     {
       "label": "회귀 테스트 도입",
       "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
