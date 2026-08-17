@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T08:47:15+09:00",
+  "generated": "2026-08-18T08:49:31+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -43,7 +43,7 @@
       "B": [
         {
           "label": "py의 경로 전환도 실행",
-          "note": "근거(7일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "note": "근거(8일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -51,6 +51,15 @@
           "blanks": [
             "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
           ]
+        },
+        {
+          "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
+          "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
+          "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+          "tags": "CI",
+          "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
+          "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+          "blanks": []
         },
         {
           "label": "회귀 테스트 도입",
@@ -77,7 +86,7 @@
   "B": [
     {
       "label": "py의 경로 전환도 실행",
-      "note": "근거(7일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "note": "근거(8일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -85,6 +94,15 @@
       "blanks": [
         "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
       ]
+    },
+    {
+      "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
+      "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
+      "question": "무엇 때문에 실패했고 무엇을 고쳐야 통과하는가",
+      "tags": "CI",
+      "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions",
+      "action": "실패 로그를 읽고 원인을 고친 뒤 재실행해 통과를 확인한다",
+      "blanks": []
     },
     {
       "label": "회귀 테스트 도입",
