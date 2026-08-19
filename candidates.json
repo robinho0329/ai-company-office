@@ -1,10 +1,11 @@
 {
-  "generated": "2026-08-19T08:49:12+09:00",
+  "generated": "2026-08-20T08:49:53+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
     "ai-company-office",
     "chungbuk-air-quality-monitor",
+    "fc-barcelona-dashboard",
     "power-grid-anomaly-monitor"
   ],
   "unavailable": {
@@ -24,6 +25,10 @@
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
     ],
+    "fc-barcelona-dashboard": [
+      "data/models/repeat_eval.json",
+      "data/eda/fault_signature.json"
+    ],
     "power-grid-anomaly-monitor": [
       "data/models/repeat_eval.json",
       "data/eda/fault_signature.json"
@@ -35,15 +40,15 @@
       "project": {
         "name": "EPL-scouting-report-dashboard-project",
         "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-        "commit": "595ee13",
-        "last_commit": "2026-08-16T21:06:59Z",
-        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 595ee13"
+        "commit": "76e92f3",
+        "last_commit": "2026-08-19T17:10:35+09:00",
+        "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 76e92f3"
       },
       "A": [],
       "B": [
         {
           "label": "py의 경로 전환도 실행",
-          "note": "근거(9일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "note": "근거(10일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -73,20 +78,52 @@
           "tags": "저장소 위생"
         }
       ]
+    },
+    {
+      "project": {
+        "name": "fc-barcelona-dashboard",
+        "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
+        "commit": "80b1e96",
+        "last_commit": "2026-08-20T00:17:37+09:00",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 80b1e96"
+      },
+      "A": [],
+      "B": [
+        {
+          "label": "회귀 테스트 도입",
+          "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
+          "question": "어느 함수부터 테스트로 고정할 것인가",
+          "source": "tests/ (없음)",
+          "action": "핵심 함수 3개에 pytest 를 붙이고 CI 에서 돌게 한다",
+          "blanks": [
+            "먼저 고정할 함수 3개"
+          ],
+          "tags": "저장소 위생"
+        },
+        {
+          "label": "CI 워크플로우 추가",
+          "note": "근거: .github/workflows 없음 — 푸시가 무엇도 검증하지 않는다",
+          "question": "푸시마다 무엇을 자동으로 확인할 것인가",
+          "source": ".github/workflows (없음)",
+          "action": "임포트 확인·테스트 실행 최소 CI 를 추가하고 배지를 README 에 붙인다",
+          "blanks": [],
+          "tags": "저장소 위생"
+        }
+      ]
     }
   ],
   "project": {
     "name": "EPL-scouting-report-dashboard-project",
     "remote": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project",
-    "commit": "595ee13",
-    "last_commit": "2026-08-16T21:06:59Z",
-    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 595ee13"
+    "commit": "76e92f3",
+    "last_commit": "2026-08-19T17:10:35+09:00",
+    "clone": "git clone https://github.com/robinho0329/EPL-scouting-report-dashboard-project && git checkout 76e92f3"
   },
   "A": [],
   "B": [
     {
       "label": "py의 경로 전환도 실행",
-      "note": "근거(9일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "note": "근거(10일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
