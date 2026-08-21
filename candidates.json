@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-21T08:52:44+09:00",
+  "generated": "2026-08-22T08:50:29+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -53,7 +53,7 @@
       "B": [
         {
           "label": "py의 경로 전환도 실행",
-          "note": "근거(11일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "note": "근거(12일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -88,9 +88,9 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "5d6149e",
-        "last_commit": "2026-08-20T22:52:40+09:00",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 5d6149e"
+        "commit": "c3833f1",
+        "last_commit": "2026-08-21T15:06:25+09:00",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout c3833f1"
       },
       "A": [],
       "B": [
@@ -120,9 +120,9 @@
       "project": {
         "name": "hanwha-eagles-dashboard",
         "remote": "https://github.com/robinho0329/hanwha-eagles-dashboard",
-        "commit": "e40143c",
-        "last_commit": "2026-08-20T20:49:32+09:00",
-        "clone": "git clone https://github.com/robinho0329/hanwha-eagles-dashboard && git checkout e40143c"
+        "commit": "e43757d",
+        "last_commit": "2026-08-21T12:22:54+09:00",
+        "clone": "git clone https://github.com/robinho0329/hanwha-eagles-dashboard && git checkout e43757d"
       },
       "A": [],
       "B": [
@@ -149,7 +149,7 @@
   "B": [
     {
       "label": "py의 경로 전환도 실행",
-      "note": "근거(11일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "note": "근거(12일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
