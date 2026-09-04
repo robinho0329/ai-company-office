@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-03T10:20:30+09:00",
+  "generated": "2026-09-04T10:12:20+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -53,7 +53,7 @@
       "B": [
         {
           "label": "py의 경로 전환도 실행",
-          "note": "근거(24일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "note": "근거(25일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -95,7 +95,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-03 — 30일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-03 — 31일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (fdcf469)",
@@ -111,9 +111,9 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "8588707",
-        "last_commit": "2026-09-01T17:30:53+09:00",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 8588707"
+        "commit": "7fc8acf",
+        "last_commit": "2026-09-03T15:33:31+09:00",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 7fc8acf"
       },
       "A": [],
       "B": [
@@ -172,7 +172,7 @@
   "B": [
     {
       "label": "py의 경로 전환도 실행",
-      "note": "근거(24일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "note": "근거(25일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
