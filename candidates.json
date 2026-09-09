@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-08T10:20:32+09:00",
+  "generated": "2026-09-09T10:24:58+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -53,7 +53,7 @@
       "B": [
         {
           "label": "py의 경로 전환도 실행",
-          "note": "근거(29일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+          "note": "근거(30일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
@@ -95,7 +95,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-03 — 35일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-03 — 36일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (fdcf469)",
@@ -111,12 +111,34 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "21bf85f",
-        "last_commit": "2026-09-04T11:20:28+09:00",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 21bf85f"
+        "commit": "044c7ef",
+        "last_commit": "2026-09-09T10:20:29+09:00",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 044c7ef"
       },
       "A": [],
       "B": [
+        {
+          "label": "이 데스크톱 대화에 대한 실제 절감률 측정",
+          "note": "근거(0일 전 기록): \"프록시 연결은 적용하지 않았다. 이 데스크톱 대화에 대한 실제 절감률은 미측정이다.…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "HANDOFF.md:434",
+          "action": "HANDOFF.md:434 가 측정 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
+        },
+        {
+          "label": "반복 로그에 선택 사용, 수치 원본 측정",
+          "note": "근거(0일 전 기록): \"결론: 반복 로그에 선택 사용, 수치 원본은 정확히 계산, 현재 채팅 절감률은 미측정.…\"",
+          "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
+          "tags": "이월 대장",
+          "source": "docs/TOKEN_BENCHMARK.md:23",
+          "action": "docs/TOKEN_BENCHMARK.md:23 가 측정 대상으로 남겨둔 항목을 처리하고, 처리 후 그 문장을 문서에서 지울 수 있는 상태로 만든다",
+          "blanks": [
+            "측정 기준 — 어느 지표가 얼마나 바뀌면 해소로 보는가"
+          ]
+        },
         {
           "label": "회귀 테스트 도입",
           "note": "근거: tests/ 디렉토리 없음 — 변경이 기존 동작을 깼는지 확인할 수단이 없다",
@@ -126,15 +148,6 @@
           "blanks": [
             "먼저 고정할 함수 3개"
           ],
-          "tags": "저장소 위생"
-        },
-        {
-          "label": "CI 워크플로우 추가",
-          "note": "근거: .github/workflows 없음 — 푸시가 무엇도 검증하지 않는다",
-          "question": "푸시마다 무엇을 자동으로 확인할 것인가",
-          "source": ".github/workflows (없음)",
-          "action": "임포트 확인·테스트 실행 최소 CI 를 추가하고 배지를 README 에 붙인다",
-          "blanks": [],
           "tags": "저장소 위생"
         }
       ]
@@ -172,7 +185,7 @@
   "B": [
     {
       "label": "py의 경로 전환도 실행",
-      "note": "근거(29일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
+      "note": "근거(30일 전 기록): \"**Marcus:** 파일은 없습니다. P1 `train_v2.py`, S6 `train_v2.py` 모두 미생성입니다. P7 `train_v5_1.py`의 경로…\"",
       "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
       "tags": "이월 대장",
       "source": "reports/daily_meeting/2026-08-09_meeting.md:49",
