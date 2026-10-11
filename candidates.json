@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-10T11:35:54+09:00",
+  "generated": "2026-10-11T11:05:51+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -52,7 +52,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-19 — 51일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-19 — 52일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (76e92f3)",
@@ -96,7 +96,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-03 — 67일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-03 — 68일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (fdcf469)",
@@ -112,9 +112,9 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "48ad9ad",
-        "last_commit": "2026-10-09T04:42:52Z",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 48ad9ad"
+        "commit": "831ee48",
+        "last_commit": "2026-10-10T04:28:14Z",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 831ee48"
       },
       "A": [],
       "B": [
@@ -142,7 +142,7 @@
         },
         {
           "label": "90% 절감 측정",
-          "note": "근거(30일 전 기록): \"90% 절감은 목표일 뿐 미측정 상태. 에이전트 포함 총 사용량과 동일 완료 기준으로 비교한다.…\"",
+          "note": "근거(31일 전 기록): \"90% 절감은 목표일 뿐 미측정 상태. 에이전트 포함 총 사용량과 동일 완료 기준으로 비교한다.…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "docs/RELEASE_CHECKLIST.md:34",
@@ -164,7 +164,7 @@
       "A": [
         {
           "label": "hanwha-eagles-dashboard 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-21 — 49일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-21 — 50일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (e43757d)",
@@ -197,7 +197,7 @@
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-08-19 — 51일 멈춤",
+      "note": "근거: 마지막 커밋 2026-08-19 — 52일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
       "source": "git log -1 (76e92f3)",
