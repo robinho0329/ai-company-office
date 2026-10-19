@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18T10:25:43+09:00",
+  "generated": "2026-10-19T10:32:32+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -52,7 +52,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-19 — 59일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-19 — 60일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (76e92f3)",
@@ -63,6 +63,17 @@
         }
       ],
       "B": [
+        {
+          "label": "🤖 EPL 스카우트팀 일일 개발 루프 워크플로 재가동",
+          "note": "근거: 상태 disabled_inactivity — 저장소 활동이 없어 GitHub 가 자동으로 껐다. 예약 실행이 돌지 않는다",
+          "question": "이 자동화를 다시 켤 것인가, 접을 것인가",
+          "tags": "CI",
+          "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions (.github/workflows/daily_dev_loop.yml)",
+          "action": "워크플로를 다시 켜고 1회 수동 실행으로 통과를 확인한다. 다시 꺼지지 않게 할 방법도 함께 정한다",
+          "blanks": [
+            "재가동 / 폐기 중 무엇인가"
+          ]
+        },
         {
           "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
           "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
@@ -96,7 +107,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-03 — 75일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-03 — 76일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (fdcf469)",
@@ -112,15 +123,15 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "53ca93d",
-        "last_commit": "2026-10-17T03:07:15Z",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 53ca93d"
+        "commit": "db039c0",
+        "last_commit": "2026-10-18T03:09:37Z",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout db039c0"
       },
       "A": [],
       "B": [
         {
           "label": "토큰 절감률 측정",
-          "note": "근거(37일 전 기록): \"토큰 절감률 미측정. Sol 독립 작업과 요약 전달을 사용하며 동일 검사 반복을 제한한다.…\"",
+          "note": "근거(38일 전 기록): \"토큰 절감률 미측정. Sol 독립 작업과 요약 전달을 사용하며 동일 검사 반복을 제한한다.…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "HANDOFF.md:461",
@@ -131,7 +142,7 @@
         },
         {
           "label": "이 데스크톱 대화에 대한 실제 절감률 측정",
-          "note": "근거(37일 전 기록): \"프록시 연결은 적용하지 않았다. 이 데스크톱 대화에 대한 실제 절감률은 미측정이다.…\"",
+          "note": "근거(38일 전 기록): \"프록시 연결은 적용하지 않았다. 이 데스크톱 대화에 대한 실제 절감률은 미측정이다.…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "HANDOFF.md:565",
@@ -142,7 +153,7 @@
         },
         {
           "label": "90% 절감 측정",
-          "note": "근거(38일 전 기록): \"90% 절감은 목표일 뿐 미측정 상태. 에이전트 포함 총 사용량과 동일 완료 기준으로 비교한다.…\"",
+          "note": "근거(39일 전 기록): \"90% 절감은 목표일 뿐 미측정 상태. 에이전트 포함 총 사용량과 동일 완료 기준으로 비교한다.…\"",
           "question": "이 항목을 처리하면 어느 수치가 얼마나 바뀌는가",
           "tags": "이월 대장",
           "source": "docs/RELEASE_CHECKLIST.md:34",
@@ -164,7 +175,7 @@
       "A": [
         {
           "label": "hanwha-eagles-dashboard 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-21 — 57일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-21 — 58일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (e43757d)",
@@ -197,7 +208,7 @@
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-08-19 — 59일 멈춤",
+      "note": "근거: 마지막 커밋 2026-08-19 — 60일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
       "source": "git log -1 (76e92f3)",
@@ -208,6 +219,17 @@
     }
   ],
   "B": [
+    {
+      "label": "🤖 EPL 스카우트팀 일일 개발 루프 워크플로 재가동",
+      "note": "근거: 상태 disabled_inactivity — 저장소 활동이 없어 GitHub 가 자동으로 껐다. 예약 실행이 돌지 않는다",
+      "question": "이 자동화를 다시 켤 것인가, 접을 것인가",
+      "tags": "CI",
+      "source": "https://github.com/robinho0329/EPL-scouting-report-dashboard-project/actions (.github/workflows/daily_dev_loop.yml)",
+      "action": "워크플로를 다시 켜고 1회 수동 실행으로 통과를 확인한다. 다시 꺼지지 않게 할 방법도 함께 정한다",
+      "blanks": [
+        "재가동 / 폐기 중 무엇인가"
+      ]
+    },
     {
       "label": "🤖 EPL 스카우트팀 일일 개발 루프 실패 복구",
       "note": "근거: 최근 실행 실패 — \"🤖 EPL 스카우트팀 일일 개발 루프\"",
