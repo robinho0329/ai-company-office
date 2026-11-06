@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-05T12:40:02+09:00",
+  "generated": "2026-11-06T12:35:30+09:00",
   "scanned_repos": [
     "EPL-scouting-report-dashboard-project",
     "H-M-data-analysis",
@@ -52,7 +52,7 @@
       "A": [
         {
           "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-19 — 77일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-19 — 78일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (76e92f3)",
@@ -107,7 +107,7 @@
       "A": [
         {
           "label": "H-M-data-analysis 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-03 — 93일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-03 — 94일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (fdcf469)",
@@ -123,9 +123,9 @@
       "project": {
         "name": "fc-barcelona-dashboard",
         "remote": "https://github.com/robinho0329/fc-barcelona-dashboard",
-        "commit": "876e35e",
-        "last_commit": "2026-11-04T04:56:47Z",
-        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 876e35e"
+        "commit": "5d181a4",
+        "last_commit": "2026-11-05T05:16:50Z",
+        "clone": "git clone https://github.com/robinho0329/fc-barcelona-dashboard && git checkout 5d181a4"
       },
       "A": [],
       "B": [
@@ -175,7 +175,7 @@
       "A": [
         {
           "label": "hanwha-eagles-dashboard 재개 여부 결정",
-          "note": "근거: 마지막 커밋 2026-08-21 — 76일 멈춤",
+          "note": "근거: 마지막 커밋 2026-08-21 — 77일 멈춤",
           "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
           "tags": "저장소 상태",
           "source": "git log -1 (e43757d)",
@@ -208,7 +208,7 @@
   "A": [
     {
       "label": "EPL-scouting-report-dashboard-project 재개 여부 결정",
-      "note": "근거: 마지막 커밋 2026-08-19 — 77일 멈춤",
+      "note": "근거: 마지막 커밋 2026-08-19 — 78일 멈춤",
       "question": "이 저장소를 계속 갈 것인가, 아카이브할 것인가",
       "tags": "저장소 상태",
       "source": "git log -1 (76e92f3)",
